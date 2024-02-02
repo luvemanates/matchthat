@@ -12,24 +12,35 @@
 
   <body>
     <div id="body_container">
-      <div id="menu">
-        <div class="menu_option">
-          <%= link_to "Popular Matches", matches_path %>
+      <div id="menu_container">
+        <div id="menu">
+          <div class="menu_option">
+            <%= link_to "Popular Matches", matches_path %>
+          </div>
+          <div class="menu_option">
+            <%= link_to "Log In", new_user_session_path %>
+          </div>
+          <div id="menu_search_container" class="menu_option">
+            <%= link_to "Search", root_path %>
+          </div>
+          <div id="menu_browse_container" class="menu_option">
+            <%= link_to "Browse Matches", matches_path %>
+          </div>
+          <div class="menu_option">
+            <%= link_to "Browse", matches_path %>
+          </div>
         </div>
-        <div class="menu_option">
-          <%= link_to "Log In", new_user_session_path %>
-        </div>
-        <div class="menu_option">
-          <%= link_to "Search", root_path %>
-        </div>
-        <div class="menu_option">
-          <%= link_to "Popular Matches", matches_path %>
-        </div>
-        <div class="menu_option">
-          <%= link_to "Browse", matches_path %>
+      </div><!-- end menu_container -->
+      <div id="logo_container">
+        <div id="logo">
+          &nbsp;
         </div>
       </div>
-      <%= yield %>
+      <div id="body_content_container">
+        <div id="body_content">
+          <%= yield %>
+        </div>
+      </div>
     </div>
   </body>
 </html>
