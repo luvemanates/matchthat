@@ -19,18 +19,25 @@
         src: url('Oswald-ExtraLight.ttf');
 }
 
+body {
+	background-image: url('pattern-whiteslashdot45px.png');
+	background-repeat: repeat;
+}
 #menu_container {
 	width: 100%;
 	background-color: black;
+	height: 60px;
 }
 #menu {
 	margin-left: auto;
 	margin-right: auto;
+	margin-top: 0px;
 	width: 1000px;
 	display: flex;
 }
 .menu_option {
 	margin-left: 50px;
+	margin-top: 10px;
 	font-family: 'Oswald';
 	font-size: 22px;
 	letter-spacing: 2px;
@@ -51,7 +58,7 @@
 }
 #logo {
 	position: relative;
-	top: -30px;
+	top: -40px;
 	left: 66px;
 	background-image: url('logo.png');
 	width: 290px;
@@ -61,8 +68,10 @@
 	width: 800px;
 	margin-left: auto;
 	margin-right: auto;
+	background-color: white;
+	border-radius: 15px;
+	padding: 20px;
+	filter: drop-shadow(10px 10px 4px #a9b9b9);
 }
 #body_content {
-	background-image: url('pattern-whiteslashdot45px.png');
-	background-repeat: repeat;
 }
