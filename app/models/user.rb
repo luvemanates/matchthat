@@ -3,6 +3,6 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
-  has_and_belongs_to_many :tickets
-  has_many :created_tickets, :class_name => 'Ticket', :foreign_key => :creator_id
+  has_and_belongs_to_many :matches
+  has_many :created_matches, :class_name => 'Match', :foreign_key => :creator_id
 end
