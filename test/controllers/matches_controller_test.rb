@@ -20,6 +20,7 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_difference("User.count") do
       @user.save
     end
+    post user_session, :params { :email => 'frank@frankg.com', :password => 'deftones' }
     assert_difference("Match.count") do
       post matches_url, params: { match: { base_amount: @match.base_amount, creator_id: @user.id, description: @match.description, title: @match.title, total_amount: @match.total_amount } }
     end

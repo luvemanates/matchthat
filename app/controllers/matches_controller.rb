@@ -21,7 +21,11 @@ class MatchesController < ApplicationController
 
   # POST /matches or /matches.json
   def create
-    @match = Match.new(match_params)
+    if user_signed_in?
+      @match = Match.new(match_params.merge(:creator => current_user))
+    else
+      redirect_to users_signin_path
+    end
 
     respond_to do |format|
       if @match.save
