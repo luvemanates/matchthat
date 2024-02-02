@@ -11,6 +11,25 @@
   </head>
 
   <body>
-    <%= yield %>
+    <div id="body_container">
+      <div id="menu">
+        <div class="menu_option">
+          <%= link_to "Popular Matches", matches_path %>
+        </div>
+        <div class="menu_option">
+          <%= link_to "Log In", new_user_session_path %>
+        </div>
+        <div class="menu_option">
+          <%= link_to "Search", root_path %>
+        </div>
+        <div class="menu_option">
+          <%= link_to "Popular Matches", matches_path %>
+        </div>
+        <div class="menu_option">
+          <%= link_to "Browse", matches_path %>
+        </div>
+      </div>
+      <%= yield %>
+    </div>
   </body>
 </html>

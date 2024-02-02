@@ -13,3 +13,26 @@
  *= require_tree .
  *= require_self
  */
+@import url('Oswald-ExtraLight.ttf');
+@font-face {
+        font-family: 'Oswald';
+        src: url('Oswald-ExtraLight.ttf');
+}
+
+#menu {
+	background-color: black;
+	width: 100%;
+}
+.menu_option {
+	display: inline-block;
+	margin-left: 40px;
+	font-family: 'Oswald';
+	font-size: 22px;
+	letter-spacing: 2px;
+	color: white;
+	
+}
+.menu_option a {
+	color: white;
+	text-decoration: none;
+}
