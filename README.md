@@ -1,4 +1,4 @@
-<h1>matchtaht</h1>
+<h1>matchthat</h1>
 A ruby on rails application that allows users to participate in different matching programs
 
 # README
