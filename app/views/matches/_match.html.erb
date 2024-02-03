@@ -1,27 +1,32 @@
 <div id="<%= dom_id match %>">
-  <p>
-    <strong>Title:</strong>
+  <p class="match_title">
     <%= match.title %>
   </p>
+  <div class="seperator">
+    &nbsp;
+  </div>
 
-  <p>
-    <strong>Total amount:</strong>
-    <%= match.total_amount %>
+  <p class="match_total">
+    <strong>Total match amount so far:</strong>
+    <span class="match_total_amount"><%= number_to_currency(match.total_amount) %></span>
   </p>
 
-  <p>
-    <strong>Description:</strong>
+  <div class="seperator">
+    &nbsp;
+  </div>
+
+  <p class="match_description">
     <%= match.description %>
   </p>
 
-  <p>
-    <strong>Base amount:</strong>
-    <%= match.base_amount %>
+  <p class="match_base_amount">
+    <strong>Match amount:</strong>
+    <%= number_to_currency(match.base_amount) %>
   </p>
 
   <p>
-    <strong>Creator:</strong>
-    <%= match.creator_id %>
+    <strong>Created by:</strong>
+    <%= match.creator.email %>
   </p>
 
 </div>
