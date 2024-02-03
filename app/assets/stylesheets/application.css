@@ -16,6 +16,7 @@
 @import url('Oswald-ExtraLight.ttf');
 @import url('URWGothic-Book.otf');
 @import url('URWGothic-Demi.otf');
+@import url('adelia.otf');
 @font-face {
         font-family: 'Oswald';
         src: url('Oswald-ExtraLight.ttf');
@@ -27,6 +28,10 @@
 @font-face {
         font-family: 'URWGothic-bold';
         src: url('URWGothic-Demi.otf');
+}
+@font-face {
+        font-family: 'adelia';
+        src: url('adelia.otf');
 }
 
 body {
@@ -123,4 +128,11 @@ body {
 }
 #body_content div.contributor_emails_container {
 	display: flex;
+}
+#body_content p.contributors_copy_container {
+	text-align: center;
+}
+#body_content p span.contributors_copy {
+	font-family: 'adelia';
+	font-size: 24px;
 }
