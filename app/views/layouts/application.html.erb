@@ -11,39 +11,47 @@
   </head>
 
   <body>
-    <div id="body_container">
-      <div id="menu_container">
-        <div id="menu">
-          <div class="menu_option">
-            <%= link_to "Popular Matches", matches_path %>
-          </div>
-          <div class="menu_option">
-            <% if user_signed_in? %>
-              <%= link_to "Log Out", destroy_user_session_path, data: { "turbo-method": :delete } %>
-            <% else %>
-              <%= link_to "Log In", new_user_session_path %>
-            <% end %>
-          </div>
-          <div id="menu_search_container" class="menu_option">
-            <%= link_to "Search", root_path %>
-          </div>
-          <div id="menu_browse_container" class="menu_option">
-            <%= link_to "Browse Matches", matches_path %>
-          </div>
-          <div class="menu_option">
-            <%= link_to "Browse", matches_path %>
-          </div>
+    <div id="menu_container">
+      <div id="menu">
+        <div class="menu_option">
+          <%= link_to "Popular Matches", matches_path %>
         </div>
-      </div><!-- end menu_container -->
-      <div id="logo_container">
-        <div id="logo">
-          &nbsp;
+        <div class="menu_option">
+          <% if user_signed_in? %>
+            <%= link_to "Log Out", destroy_user_session_path, data: { "turbo-method": :delete } %>
+          <% else %>
+            <%= link_to "Log In", new_user_session_path %>
+          <% end %>
+        </div>
+        <div id="menu_search_container" class="menu_option">
+          <%= link_to "Search", root_path %>
+        </div>
+        <div id="menu_browse_container" class="menu_option">
+          <%= link_to "Browse Matches", matches_path %>
+        </div>
+        <div class="menu_option">
+          <%= link_to "Browse", matches_path %>
         </div>
       </div>
-      <div id="body_content_container">
-        <div id="body_content">
-          <%= yield %>
+    </div><!-- end menu_container -->
+    <div id="logo_container">
+      <div id="logo">
+        &nbsp;
+      </div>
+    </div>
+    <div id="content_columns">
+      <div id="column_left">
+      </div>
+      <div id="column_center">
+        <div id="body_container">
+          <div id="body_content_container">
+            <div id="body_content">
+              <%= yield %>
+            </div>
+          </div>
         </div>
+      </div>
+      <div id="column_right">
       </div>
     </div>
   </body>
