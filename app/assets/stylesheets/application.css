@@ -121,3 +121,6 @@ body {
 #body_content p.match_base_amount {
 	text-align: right;
 }
+#body_content div.contributor_emails_container {
+	display: flex;
+}
