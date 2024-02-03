@@ -88,6 +88,7 @@ body {
 }
 #column_left {
 	margin-top: -83px;
+	margin-right: -8px;
 	background-repeat: repeat;
 	background-image: url('slanted-netting.png');
 	min-width: 100px;
@@ -101,6 +102,7 @@ body {
 }
 #column_right {
 	margin-top: -83px;
+	margin-right: -8px;
 	min-width: 100px;
 	max-width: 200px;
 	min-height: 100%;
