@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
   devise_for :users
-  resources :matches
+  resources :matches do
+    collection do 
+      get 'popular' #, :controller => :matches, :action => 'popular'
+    end
+  end
   get '/search/show/:search_params/:page', :controller => :search, :action => 'show'
   post '/search/:search_params/:page', :controller => :search, :action => 'create'
 

@@ -11,6 +11,15 @@ class MatchesController < ApplicationController
     @matches = Match.all.includes(:creator).order(:created_at => :desc).paginate(:page => @page, :per_page => 5 )
   end
 
+  def popular
+    if params[:page]
+      @page = params[:page]
+    else
+      @page = 1 
+    end
+    @matches = Match.all.includes(:creator).order(:total_amount => :desc).paginate(:page => @page, :per_page => 5 )
+  end
+
   # GET /matches/1 or /matches/1.json
   def show
   end
@@ -29,7 +38,8 @@ class MatchesController < ApplicationController
     if user_signed_in?
       @match = Match.new(match_params.merge(:creator => current_user))
     else
-      redirect_to user_session_path
+      flash[:notice] = "You must login first."
+      redirect_to user_session_path and return
     end
 
     respond_to do |format|

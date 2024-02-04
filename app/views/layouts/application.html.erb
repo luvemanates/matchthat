@@ -14,7 +14,7 @@
     <div id="menu_container">
       <div id="menu">
         <div class="menu_option">
-          <%= link_to "Popular Matches", matches_path %>
+          <%= link_to "Popular Matches", popular_matches_path %>
         </div>
         <div class="menu_option">
           <% if user_signed_in? %>
@@ -27,10 +27,10 @@
           <%= link_to "Search", { :action => 'show', :controller => '/search', :search_params => 'anonymous', :page => 1} %>
         </div>
         <div id="menu_browse_container" class="menu_option">
-          <%= link_to "Browse Matches", matches_path %>
+          <%= link_to "Recent Matches", matches_path %>
         </div>
         <div class="menu_option">
-          <%= link_to "Browse", matches_path %>
+          <%= link_to "New Match", new_match_path %>
         </div>
       </div>
     </div><!-- end menu_container -->

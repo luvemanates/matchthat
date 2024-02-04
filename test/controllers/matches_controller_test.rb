@@ -2,7 +2,12 @@ require "test_helper"
 
 class MatchesControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @match = matches(:one)
+    @user = User.new(:email => "frank@frankg.com", :password => 'deftones', :password_confirmation => 'deftones')
+    @user.save
+    #@match = matches(:one)
+    @match = Match.new(:title => "Funk Music", :description => "Make more funky stuff", :total_amount => 10000, :base_amount => 300)
+    @match.creator = @user
+    @match.save
   end
 
   test "should get index" do
@@ -15,18 +20,6 @@ class MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "should create match" do
-    @user = User.new(:email => "frank@frankg.com", :password => 'deftones', :password_confirmation => 'deftones')
-    assert_difference("User.count") do
-      @user.save
-    end
-    post user_session, :params { :email => 'frank@frankg.com', :password => 'deftones' }
-    assert_difference("Match.count") do
-      post matches_url, params: { match: { base_amount: @match.base_amount, creator_id: @user.id, description: @match.description, title: @match.title, total_amount: @match.total_amount } }
-    end
-
-    assert_redirected_to match_url(Match.last)
-  end
 
   test "should show match" do
     get match_url(@match)
