@@ -165,3 +165,19 @@ body {
 	font-family: 'adelia';
 	font-size: 24px;
 }
+.content_container {
+	margin-top: 25px;
+	width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: white;
+	border-radius: 15px;
+	padding: 20px;
+	filter: drop-shadow(10px 10px 4px #a9b9b9);
+}
+.content_container_internal {
+	width: 350px;
+	margin-top: 10px;
+	margin-left: auto;
+	margin-right: auto;
+}
