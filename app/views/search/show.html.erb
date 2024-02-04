@@ -1,0 +1,24 @@
+<div class="content_container">
+  <h1>
+  Search for any ticket
+  </h1>
+
+
+  <div id="search_container">
+    <%= form_with :url => {:action => 'create', :controller => 'search'} do |form| %>
+      <%= form.label :search_params, style: "display: block", :class => "search_label" %>
+      <%= form.text_field :posted_search_params, :value => @search_params %>
+      <%= form.hidden_field :posted_page, :value => @page %>
+      <%= form.submit 'Search', :id => 'search_btn_container' %>
+    <% end %>
+    <br/>
+  </div>
+</div>
+<div class="seperator">&nbsp;</div>
+  <% for match in @matches %>
+    <%= render 'matches/match', :match => match %>
+    <br/>
+  <% end %>
+<div id="paginate_links_container">
+  <%= will_paginate @matches %>
+</div>

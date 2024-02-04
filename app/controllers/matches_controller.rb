@@ -3,7 +3,12 @@ class MatchesController < ApplicationController
 
   # GET /matches or /matches.json
   def index
-    @matches = Match.all
+    if params[:page]
+      @page = params[:page]
+    else
+      @page = 1 
+    end
+    @matches = Match.all.includes(:creator).order(:created_at => :desc).paginate(:page => @page, :per_page => 5 )
   end
 
   # GET /matches/1 or /matches/1.json
