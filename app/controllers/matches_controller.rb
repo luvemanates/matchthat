@@ -24,7 +24,7 @@ class MatchesController < ApplicationController
     if user_signed_in?
       @match = Match.new(match_params.merge(:creator => current_user))
     else
-      redirect_to users_signin_path
+      redirect_to user_session_path
     end
 
     respond_to do |format|
