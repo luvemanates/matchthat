@@ -1,4 +1,4 @@
-<div class="content_container">
+<div id="<%= dom_id match %>" class="match_content_container">
   <%= form_with(model: match) do |form| %>
     <% if match.errors.any? %>
       <div style="color: red">
@@ -12,29 +12,38 @@
       </div>
     <% end %>
 
-    <div>
-      <%= form.label :title, style: "display: block" %>
-      <%= form.text_field :title %>
+    <p class="match_title">
+      <%= form.text_field :title, :value => "TITLE", :class => 'match_title_input' %>
+    </p>
+    <div class="separator">
+      &nbsp;
     </div>
 
-    <div>
-      <%= form.label :total_amount, style: "display: block" %>
-      <%= form.text_field :total_amount %>
+    <p class="match_total">
+      <strong>Total match amount so far:</strong>
+      <%= form.text_field :total_amount, :class => 'match_total_amount_input', :value => '10000' %>
+    </p>
+
+    <div class="separator">
+      &nbsp;
     </div>
 
-    <div>
-      <%= form.label :description, style: "display: block" %>
-      <%= form.text_field :description %>
+    <p class="match_description">
+      <%= form.text_area :description, :value => 'This is the default description', :class => 'match_description_input' %>
+    </p>
+
+    <div class="separator">
+      &nbsp;
     </div>
 
-    <div>
-      <%= form.label :base_amount, style: "display: block" %>
+
+    <p class="match_base_amount">
+      <%= form.label :base_match_amount, style: "display: block" %>
       <%= form.text_field :base_amount %>
-    </div>
+    </p>
 
     <div>
-      <%= form.label :creator_id, style: "display: block" %>
-      <%= form.number_field :creator_id %>
+      Created by: <%= current_user.email %>
     </div>
 
     <div>

@@ -44,6 +44,7 @@ class MatchesController < ApplicationController
 
     respond_to do |format|
       if @match.save
+        @match.users << current_user
         format.html { redirect_to match_url(@match), notice: "Match was successfully created." }
         format.json { render :show, status: :created, location: @match }
       else
