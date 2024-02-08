@@ -33,6 +33,18 @@ class MatchesController < ApplicationController
   def edit
   end
 
+  def matchthat
+    @match = Match.find(params[:id])
+    if @match.users.include?(current_user)
+      flash[:notice] = "You're already matching that."
+      redirect_to match_path(@match) and return
+    else
+      @match.users << current_user
+      flash[:notice] = "You're now matching that."
+      redirect_to match_path(@match) and return
+    end
+  end
+
   # POST /matches or /matches.json
   def create
     if user_signed_in?

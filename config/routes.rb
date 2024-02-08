@@ -4,6 +4,9 @@ Rails.application.routes.draw do
     collection do 
       get 'popular' #, :controller => :matches, :action => 'popular'
     end
+    member do
+      post 'matchthat'
+    end
   end
   get '/search/show/:search_params/:page', :controller => :search, :action => 'show'
   post '/search/:search_params/:page', :controller => :search, :action => 'create'
