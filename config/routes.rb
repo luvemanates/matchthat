@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     end
     member do
       post 'matchthat'
+      get 'user_tally'
     end
   end
   get '/search/show/:search_params/:page', :controller => :search, :action => 'show'

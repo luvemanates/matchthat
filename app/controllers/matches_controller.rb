@@ -1,5 +1,5 @@
 class MatchesController < ApplicationController
-  before_action :set_match, only: %i[ show edit update destroy ]
+  before_action :set_match, only: %i[ show edit update destroy user_tally ]
 
   # GET /matches or /matches.json
   def index
@@ -18,6 +18,15 @@ class MatchesController < ApplicationController
       @page = 1 
     end
     @matches = Match.all.includes(:creator, :users).order(:total_amount => :desc).paginate(:page => @page, :per_page => 5 )
+  end
+
+  def user_tally
+    @matches_for_sum = Match.where(:creator => @match.creator)
+    @matches = Match.where(:creator => @match.creator).includes(:creator, :users).paginate(:page => @page, :per_page => 5)
+    @tally = 0
+    for match in @matches_for_sum
+      @tally = @tally + match.total_amount
+    end
   end
 
   # GET /matches/1 or /matches/1.json
