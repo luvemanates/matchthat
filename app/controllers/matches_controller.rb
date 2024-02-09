@@ -8,7 +8,7 @@ class MatchesController < ApplicationController
     else
       @page = 1 
     end
-    @matches = Match.all.includes(:creator).order(:created_at => :desc).paginate(:page => @page, :per_page => 5 )
+    @matches = Match.all.includes(:creator, :users).order(:created_at => :desc).paginate(:page => @page, :per_page => 5 )
   end
 
   def popular
@@ -17,7 +17,7 @@ class MatchesController < ApplicationController
     else
       @page = 1 
     end
-    @matches = Match.all.includes(:creator).order(:total_amount => :desc).paginate(:page => @page, :per_page => 5 )
+    @matches = Match.all.includes(:creator, :users).order(:total_amount => :desc).paginate(:page => @page, :per_page => 5 )
   end
 
   # GET /matches/1 or /matches/1.json

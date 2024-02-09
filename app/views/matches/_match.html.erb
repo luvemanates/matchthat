@@ -35,38 +35,20 @@
     <span class="contributors_copy">this has been matched by:</span>
   </p>
   <div class="contributor_emails_container">
-    <div class="contributor_emails">
-      <ul>
-        <li>
-          one@one.com 
-        </li>
-        <li>
-          twoe@one.com 
-        </li>
-        <li>
-          three@one.com 
-        </li>
-        <li>
-          foure@one.com 
-        </li>
-      </ul>
-    </div>
-    <div class="contributor_emails">
-      <ul>
-        <li>
-          five@one.com 
-        </li>
-        <li>
-           six@one.com 
-        </li>
-        <li>
-          sevene@one.com 
-        </li>
-        <li>
-          eight@one.com 
-        </li>
-      </ul>
-    </div>
+  <% i = 0 %>
+    <% for user in match.users %>
+      <% if (i % 4) == 0 %>
+        <div class="contributor_emails">
+          <ul>
+      <% end %>
+          <li>
+            <%= user.email %>
+          </li>
+        <% if (i % 4) == 0 %>
+          </ul>
+        </div>
+        <% end %>
+    <% end %>
   </div>
   <div class="matchthat_btn_container">
     <%= button_to 'Match That', matchthat_match_path(match) %>
