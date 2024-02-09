@@ -1,0 +1,17 @@
+<p style="color: green"><%= notice %></p>
+<h1>Total match count for:</h1>
+<%= @match.creator.email %>(<%= number_to_currency(@tally) %>)
+<br/>
+<div id="matches">
+  <% @matches.each do |match| %>
+    <%= render match %>
+    <p>
+      <%= link_to "Show this match", match %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New match", new_match_path %>
+
+<div>&nbsp;</div>
+<%= will_paginate(@matches) %>
