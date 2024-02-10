@@ -25,7 +25,7 @@ class MatchesController < ApplicationController
     @matches = Match.where(:creator => @match.creator).includes(:creator, :users).paginate(:page => @page, :per_page => 5)
     @tally = 0
     for match in @matches_for_sum
-      @tally = @tally + match.total_amount
+      @tally = @tally + match.total_amount.to_f
     end
   end
 
