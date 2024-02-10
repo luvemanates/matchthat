@@ -43,6 +43,10 @@ class MatchesController < ApplicationController
   end
 
   def matchthat
+    unless user_signed_in?
+      redirect_to new_user_session_path, notice: 'You must sign in to do that.' 
+      return 
+    end
     @match = Match.find(params[:id])
     if @match.users.include?(current_user)
       flash[:notice] = "You're already matching that."
