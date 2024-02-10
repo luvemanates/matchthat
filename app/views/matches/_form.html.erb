@@ -43,7 +43,11 @@
     </p>
 
     <div>
-      Created by: <%= current_user.email %>
+      <% if user_signed_in? %>
+        Created by: <%= current_user.email %>
+      <% else %>
+          Created by: (will use your email after submit)
+      <% end %>
     </div>
 
     <div>
