@@ -36,18 +36,20 @@
   </p>
   <div class="contributor_emails_container">
   <% i = 0 %>
+  <% match_size = match.users.size %>
     <% for user in match.users %>
-      <% if (i % 4) == 0 %>
+      <% if (((i % 4) == 0)) %>
         <div class="contributor_emails">
           <ul>
       <% end %>
-          <li>
-            <%= user.email %>
-          </li>
-        <% if (i % 4) == 0 %>
+            <li>
+              <%= user.email %>
+            </li>
+        <% if (((i % 4) == 3)) || (match_size == i + 1) %>
           </ul>
         </div>
         <% end %>
+      <% i = i + 1 %>
     <% end %>
   </div>
   <div class="matchthat_btn_container">
