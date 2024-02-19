@@ -8,7 +8,11 @@
 
   <p class="match_total">
     <strong>Total match amount so far:</strong>
-    <span class="match_total_amount"><%= number_to_currency(match.total_amount) %></span>
+    <% if match.base_amount < 1 %>
+      <span class="match_total_amount">(<%= Float::INFINITY %>)</span>
+    <% else %>
+      <span class="match_total_amount"><%= number_to_currency(match.total_amount) %></span>
+    <% end %>
   </p>
 
   <div class="separator">
@@ -21,7 +25,11 @@
 
   <p class="match_base_amount">
     <strong>Match amount:</strong>
-    <%= number_to_currency(match.base_amount) %>
+    <% if match.base_amount < 1 %>
+      (<%= Float::INFINITY %>)
+    <% else %>
+      <%= number_to_currency(match.base_amount) %>
+    <% end %>
   </p>
 
   <p>

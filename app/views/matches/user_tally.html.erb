@@ -1,6 +1,10 @@
 <p style="color: green"><%= notice %></p>
 <h1>Total match count for:</h1>
-<%= @match.creator.email %>(<%= number_to_currency(@tally) %>)
+<% if @tally < 1 %>
+  <%= @match.creator.email %>(<%= Float::INFINITY %>)
+<% else %>
+  <%= @match.creator.email %>(<%= number_to_currency(@tally) %>)
+<% end %>
 <br/>
 <div id="matches">
   <% @matches.each do |match| %>
