@@ -30,7 +30,9 @@ class Blockchain
     index = @chain.length
     timestamp = Time.now
     previous_hash = previous_block.hash
-    @chain << Block.new(index, timestamp, data, previous_hash)
+    added_chain = Block.new(index, timestamp, data, previous_hash)
+    @chain << added_chain
+    return added_chain
   end
 
   private
