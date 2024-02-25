@@ -1,17 +1,32 @@
 require_relative 'mint'
 require_relative 'blockchain'
 require_relative 'digital_wallet'
+require_relative 'matchthat_cryptography'
+
+common = {
+  :key_length  => 4096,
+  :digest_func => OpenSSL::Digest::SHA256.new
+}
 
 blockchain = Blockchain.new
 mint = MatchMint.new(1)
-bank_wallet = DigitalWallet.new
+matchthat_crypto = MatchThatCryptography.new
+mint_wallet_crypto_card = matchthat_crypto.make_party(common, "Mint Wallet")
+bank_wallet_crypto_card = matchthat_crypto.make_party(common, "Bank Wallet")
+mint_wallet = DigitalWallet.new('mint_wallet', mint_wallet_crypto_card)
+bank_wallet = DigitalWallet.new('bank_wallet', bank_wallet_crypto_card)
 time = 0
 while(true) #thread = Thread.new { 
   sleep 1; 
   time = time + 1
   mint.mint(1)  
   added_block = blockchain.add_block("New MatchCoin minted: +1 matchcoin")
-  bank_wallet.add_funds(1) #this is where we need encrypted TX
+  matchthat_crypto.process_message(common, mint_wallet_crypto_card, bank_wallet_crypto_card, "Hey Peter, it's John here!")
+  puts
+  matchthat_crypto.process_message(common, bank_wallet_crypto_card, mint_wallet_crypto_card, "Hey John, it's Peter over here!")
+  mint_wallet.add_funds(1) #this is where we need encrypted TX
+  mint_wallet.check_balance
+  bank_wallet.add_funds(mint_wallet.withdraw_funds(1))
   bank_wallet.check_balance
 
   puts "Block ##{added_block.index}"
@@ -21,6 +36,11 @@ while(true) #thread = Thread.new {
   puts "Hash: #{added_block.hash}"
   puts "\n"
 end
+
+
+
+puts
+
 
 #wallet.withdraw_funds(50)
 #wallet.check_balance
