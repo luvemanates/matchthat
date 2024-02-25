@@ -21,13 +21,17 @@ while(true) #thread = Thread.new {
   time = time + 1
   mint.mint(1)  
   added_block = blockchain.add_block("New MatchCoin minted: +1 matchcoin")
-  matchthat_crypto.process_message(common, mint_wallet_crypto_card, bank_wallet_crypto_card, "Hey Peter, it's John here!")
+  random_secret = (0...16).map { (65 + rand(26)).chr }.join
+  random_secret = matchthat_crypto.process_message(common, mint_wallet_crypto_card, bank_wallet_crypto_card, "Requesting deposit authorization:", random_secret)
   puts
-  matchthat_crypto.process_message(common, bank_wallet_crypto_card, mint_wallet_crypto_card, "Hey John, it's Peter over here!")
-  mint_wallet.add_funds(1) #this is where we need encrypted TX
-  mint_wallet.check_balance
-  bank_wallet.add_funds(mint_wallet.withdraw_funds(1))
-  bank_wallet.check_balance
+  puts "This is where a shared secret auth number should be communicated"
+  other_secret = matchthat_crypto.process_message(common, bank_wallet_crypto_card, mint_wallet_crypto_card, "Confirming deposit authorization.", random_secret)
+  if( random_secret == other_secret )
+    mint_wallet.add_funds(1) #this is where we need encrypted TX
+    mint_wallet.check_balance
+    bank_wallet.add_funds(mint_wallet.withdraw_funds(1))
+    bank_wallet.check_balance
+  end
 
   puts "Block ##{added_block.index}"
   puts "Timestamp: #{added_block.timestamp}"

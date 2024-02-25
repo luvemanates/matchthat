@@ -19,7 +19,7 @@ class MatchThatCryptography
 
   end
 
-  def process_message(conf, from_party, to_party, message)
+  def process_message(conf, from_party, to_party, message, secret)
 
     # using the sender's private key, generate a signature for the message
     signature = from_party[:keypair].sign(conf[:digest_func], message)
