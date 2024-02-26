@@ -25,11 +25,11 @@ class MatchThatCryptography
     signature = from_party[:keypair].sign(conf[:digest_func], message)
 
     # messages are encrypted (by the sender) using the recipient's public key
-    encrypted = to_party[:pubkey].public_encrypt(message)
+    encrypted_message = to_party[:pubkey].public_encrypt(message)
     encrypted_secret = to_party[:pubkey].public_encrypt(secret)
 
     # messages are decrypted (by the recipient) using their private key
-    decrypted = to_party[:keypair].private_decrypt(encrypted)
+    decrypted = to_party[:keypair].private_decrypt(encrypted_message)
     decrypted_secret = to_party[:keypair].private_decrypt(encrypted_secret)
 
     puts "Signature:"
@@ -37,7 +37,7 @@ class MatchThatCryptography
 
     puts
     puts "Encrypted:"
-    puts Base64.encode64(encrypted)
+    puts Base64.encode64(encrypted_message)
 
     puts
     puts "From: #{from_party[:name]}"
