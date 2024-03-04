@@ -9,7 +9,7 @@ common = {
 }
 
 blockchain = Blockchain.new
-mint = MatchMint.new(1)
+mint = MatchMintBank.new
 matchthat_crypto = MatchThatCryptography.new
 mint_wallet_crypto_card = matchthat_crypto.make_party(common, "Mint Wallet")
 bank_wallet_crypto_card = matchthat_crypto.make_party(common, "Bank Wallet")

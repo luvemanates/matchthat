@@ -1,33 +1,36 @@
+require 'securerandom'
+require_relative 'ledger'
+#how do we verify a wallet isn't just creating as many coins as it wants?
+#the bank ledger should perhaps own and issue the wallet even if someone else is using it.
+
 class DigitalWallet
   attr_reader :balance
-  attr_accessor :crypto_card
+  attr_accessor :crypto_card #crypto card needs to have its own private key, and password
   attr_accessor :wallet_name
+  attr_accessor :ledger #each wallet should have its own ledger for credits and debits
+  attr_accessor :coins
+  attr_reader :wallet_identification
 
-  def initialize(wallet_name, crypto_card)
-    @balance = 0
-    @crypto_card = crypto_card
+  def initialize(wallet_name, crypto_card, coins=[], ledger=Ledger.new)
     @wallet_name = wallet_name
+    @crypto_card = crypto_card
+    @coins = coins
+    @ledger = ledger
+    @balance = ledger.current_ledger_amount
+    @wallet_identification = SecureRandom.uuid
   end
 
-  def add_funds(amount)
-    if amount > 0
-      @balance += amount
-      puts "Added #{amount} to your " + @wallet_name.to_s + " wallet."
-    else
-      puts "Invalid amount in #{@wallet_name}. Please enter a positive number."
-    end
+  def debit_coin(coin)
+    ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT,1, coin)
+    @ledger.ledger_entry_blocks << ledger_entry_block
+    @coins << coin
   end
 
-  def withdraw_funds(amount)
-    if amount <= @balance && amount > 0
-      @balance -= amount
-      puts "Withdrawn #{amount} from your " + @wallet_name.to_s + " wallet."
-    elsif amount <= 0
-      puts "Invalid amount in " + @wallet_name.to_s + " Please enter a positive number."
-    else
-      puts "Insufficient funds in " + @wallet_name.to_s + "."
-    end
-    return amount
+  def credit_coin
+    coin = @coins.last
+    ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::CREDIT,1, coin)
+    @ledger.ledger_entry_blocks << ledger_entry_block
+    return coin
   end
 
   def check_balance
