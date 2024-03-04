@@ -23,15 +23,16 @@ ledger = Ledger.new('Random Ledger', blocks, 2)
 #this comes back with two coins - but the wallet should reflect the real sum of face value amounts
 puts ledger.ledger_name + " has amount: " + ledger.current_ledger_amount.to_s
 
-crypto = MatchThatCryptography.new
 
-common = {
+crypto_config = {
   :key_length  => 4096,
   :digest_func => OpenSSL::Digest::SHA256.new
 }
 
-mint_wallet_crypto_card = crypto.make_party(common, "Mint Wallet")
-bank_wallet_crypto_card = crypto.make_party(common, "Bank Wallet")
+crypto = MatchThatCryptography.new(crypto_config)
+
+mint_wallet_crypto_card = crypto.make_party("Mint Wallet")
+bank_wallet_crypto_card = crypto.make_party("Bank Wallet")
 
 mint_wallet = DigitalWallet.new('Mint Wallet', mint_wallet_crypto_card) 
 bank_wallet = DigitalWallet.new('Bank Wallet', bank_wallet_crypto_card) 
