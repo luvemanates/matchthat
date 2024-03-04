@@ -38,6 +38,11 @@ class DigitalWallet
     return coin
   end
 
+  def request_credit_auth_from(receiver_wallet)
+    return true
+    #verify a secret has been shared
+  end
+
   def check_balance
     puts "The current balance of " + @wallet_name.to_s + " #{@balance}."
   end

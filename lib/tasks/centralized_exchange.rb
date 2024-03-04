@@ -29,7 +29,10 @@ class CentralizedExchange
     return @coins
   end
 
+  #this needs an authorization from both wallets
   def self.transfer(sender_wallet, receiver_wallet, amount=1)
+    #use the crypto card to ask for auth for a credit on the sender with receiver ident
+    #auth = sender_wallet.request_credit_auth_from(receiver_wallet)
     tx_coin = sender_wallet.credit_coin
     receiver_wallet.debit_coin(tx_coin)
   end

@@ -23,14 +23,28 @@ ledger = Ledger.new('Random Ledger', blocks, 2)
 #this comes back with two coins - but the wallet should reflect the real sum of face value amounts
 puts ledger.ledger_name + " has amount: " + ledger.current_ledger_amount.to_s
 
-mint_crypto_card = MatchThatCryptography.new
-mint_wallet = DigitalWallet.new('Mint Wallet', mint_crypto_card) 
+crypto = MatchThatCryptography.new
+
+common = {
+  :key_length  => 4096,
+  :digest_func => OpenSSL::Digest::SHA256.new
+}
+
+mint_wallet_crypto_card = crypto.make_party(common, "Mint Wallet")
+bank_wallet_crypto_card = crypto.make_party(common, "Bank Wallet")
+
+mint_wallet = DigitalWallet.new('Mint Wallet', mint_wallet_crypto_card) 
+bank_wallet = DigitalWallet.new('Bank Wallet', bank_wallet_crypto_card) 
+
 mint_wallet.debit_coin(coin)
 
-bank_crypto_card = MatchThatCryptography.new
-bank_wallet = DigitalWallet.new('Bank Wallet', bank_crypto_card) 
 
-CentralizedExchange.transfer( mint_wallet, bank_wallet, 1)
+random_secret = (0...16).map { (65 + rand(26)).chr }.join
+matchthat_crypto = MatchThatCryptography.new
+other_secret = matchthat_crypto.process_message(common, mint_wallet_crypto_card, bank_wallet_crypto_card, "Requesting deposit authorization:", random_secret)
+if( random_secret == other_secret )
+  CentralizedExchange.transfer( mint_wallet, bank_wallet, 1)
+  bank_wallet.check_balance
+  mint_wallet.check_balance
+end
 
-bank_wallet.check_balance
-mint_wallet.check_balance
