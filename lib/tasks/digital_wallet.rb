@@ -20,6 +20,7 @@ class DigitalWallet
     @wallet_identification = SecureRandom.uuid
   end
 
+  #need to ensure we are not trying to debit the same coin twice
   def debit_coin(coin)
     ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT, coin)
     @ledger.ledger_entry_blocks << ledger_entry_block
@@ -27,7 +28,8 @@ class DigitalWallet
     @balance += coin.face_value
   end
 
-  def credit_coin #there needs to be something better here
+  #there needs to be something better here if minting face values less or more than 1
+  def credit_coin 
     coin = @coins.last
     @coins.delete(coin)
     ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::CREDIT, coin)

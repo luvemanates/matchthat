@@ -7,7 +7,8 @@ require_relative 'centralized_exchange'
 coins = []
 coin = MatchMintCoin.new
 coins << coin
-CentralizedExchange.new(coins)
+exchange = CentralizedExchange.new(coins)
+
 
 blocks = []
 ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT, coin)
@@ -25,3 +26,11 @@ puts ledger.ledger_name + " has amount: " + ledger.current_ledger_amount.to_s
 mint_crypto_card = MatchThatCryptography.new
 mint_wallet = DigitalWallet.new('Mint Wallet', mint_crypto_card) 
 mint_wallet.debit_coin(coin)
+
+bank_crypto_card = MatchThatCryptography.new
+bank_wallet = DigitalWallet.new('Bank Wallet', bank_crypto_card) 
+
+CentralizedExchange.transfer( mint_wallet, bank_wallet, 1)
+
+bank_wallet.check_balance
+mint_wallet.check_balance

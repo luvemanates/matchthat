@@ -20,9 +20,17 @@ class CentralizedExchange
   def remove_duplicates_or_forgeries
     serial_numbers = []
     for coin in @coins
-      serial_numbers << coin.serial_number unless serial_numbers.include?(coin.serial_number)
-      @coins.delete(coin)
+      if not serial_numbers.include?(coin.serial_number)
+        serial_numbers << coin.serial_number 
+      else
+        @coins.delete(coin)
+      end
     end
     return @coins
+  end
+
+  def self.transfer(sender_wallet, receiver_wallet, amount=1)
+    tx_coin = sender_wallet.credit_coin
+    receiver_wallet.debit_coin(tx_coin)
   end
 end
