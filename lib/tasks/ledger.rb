@@ -56,9 +56,9 @@ class LedgerEntryBlock
   attr_accessor :ledger_entry_type #credit or debit
   attr_accessor :coin_serial_number
 
-  def initialize(ledger_entry_type, entry_amount, coin)
+  def initialize(ledger_entry_type, coin)
     self.ledger_entry_type = ledger_entry_type
-    self.entry_amount = entry_amount
+    self.entry_amount = coin.face_value 
     self.coin_serial_number = coin.serial_number
   end
 end

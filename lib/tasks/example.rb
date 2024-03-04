@@ -2,18 +2,24 @@ require_relative 'digital_wallet'
 require_relative 'mint'
 require_relative 'matchthat_cryptography'
 require_relative 'ledger'
+require_relative 'centralized_exchange'
 
+coins = []
 coin = MatchMintCoin.new
+coins << coin
+CentralizedExchange.new(coins)
+
 blocks = []
-ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT, 1, coin)
+ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT, coin)
 blocks << ledger_entry_block
-ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT, 1, coin)
+ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT, coin)
 blocks << ledger_entry_block
-ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::CREDIT, 1, coin)
+ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::CREDIT, coin)
 blocks << ledger_entry_block
 
 ledger = Ledger.new('Random Ledger', blocks, 2)
 
+#this comes back with two coins - but the wallet should reflect the real sum of face value amounts
 puts ledger.ledger_name + " has amount: " + ledger.current_ledger_amount.to_s
 
 mint_crypto_card = MatchThatCryptography.new

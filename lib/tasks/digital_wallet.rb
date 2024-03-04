@@ -21,14 +21,14 @@ class DigitalWallet
   end
 
   def debit_coin(coin)
-    ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT,1, coin)
+    ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT, coin)
     @ledger.ledger_entry_blocks << ledger_entry_block
     @coins << coin
   end
 
   def credit_coin
     coin = @coins.last
-    ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::CREDIT,1, coin)
+    ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::CREDIT, coin)
     @ledger.ledger_entry_blocks << ledger_entry_block
     return coin
   end
