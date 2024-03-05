@@ -33,7 +33,10 @@ class MatchThatCryptography
   end
 =end
 
-  def encrypt_message(conf, from_party, message, secret)
+  def encrypt_message_with_recipient_public_key(recipient_public_key, message)
+    recipient_public_key  = OpenSSL::PKey::RSA.new(recipient_public_key)
+    encrypted_message = recipient_public_key.public_encrypt(message)
+    #encrypted_secret = to_party[:pubkey].public_encrypt(secret)
   end
 
   def process_message(conf, from_party, to_party, message, secret)

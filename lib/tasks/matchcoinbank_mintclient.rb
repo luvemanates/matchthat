@@ -9,10 +9,13 @@ bank_wallet = DigitalWallet.new('Bank Wallet', bank_crypto)
 
 host = 'localhost'
 port = 2000
-client_socket = TCPSocket.open(host, port)
+bank_client_socket = TCPSocket.open(host, port)
 request = { 'public_key' => bank_crypto.public_key }.to_json
-client_socket.print(request)
-client_socket.close
+bank_client_socket.puts(request)
+params = JSON.parse(bank_client_socket.gets)
+puts "params is "
+puts params
+bank_client_socket.close
 
 
 
