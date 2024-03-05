@@ -17,8 +17,8 @@ class MatchThatCryptography
 
   def initialize(conf=CONFIG)
     @config = conf
-    @pair = OpenSSL::PKey::RSA.new(@config[:key_length])
-    @public_key  = OpenSSL::PKey::RSA.new(@pair.public_key.to_der)
+    @keypair = OpenSSL::PKey::RSA.new(@config[:key_length])
+    @public_key  = OpenSSL::PKey::RSA.new(@keypair.public_key.to_der)
     @name = 'default card'
   end
 
@@ -37,6 +37,11 @@ class MatchThatCryptography
     recipient_public_key  = OpenSSL::PKey::RSA.new(recipient_public_key)
     encrypted_message = recipient_public_key.public_encrypt(message)
     #encrypted_secret = to_party[:pubkey].public_encrypt(secret)
+  end
+
+  def decrypt_message_with_private_key(encrypted_message)
+    decrypted_message = @keypair.private_decrypt(encrypted_message)
+    return decrypted_message
   end
 
   def process_message(conf, from_party, to_party, message, secret)

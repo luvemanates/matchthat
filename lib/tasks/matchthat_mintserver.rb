@@ -12,6 +12,7 @@ port = 2000
 server = TCPServer.open(host, port) # Bind to port 2000
 mint = MatchMintingBank.new 
 matchthatmint_crypto = MatchThatCryptography.new(MatchThatCryptography::CONFIG)
+#matchthatbank_crypto = MatchThatCryptography.new(MatchThatCryptography::CONFIG)
 mint_wallet = DigitalWallet.new('mint_wallet', matchthatmint_crypto)
 exchange = CentralizedExchange.new
 
@@ -25,8 +26,10 @@ loop {
   if not params["public_key"].nil?
     #other_secret = matchthat_crypto.encrypt_message(mint_wallet_crypto_card, params[:public_key], "Requesting deposit authorization:", random_secret)
     encrypted_message = matchthatmint_crypto.encrypt_message_with_recipient_public_key(params["public_key"], random_secret)
-    puts 'encrypted message is' 
-    puts encrypted_message
+    decrypted_message = matchthatbank_crypto.decrypt_message_with_private_key(encrypted_message)
+    puts 'encrypted message is encoding is ' 
+    encrypted_message = "See if this is even recieved"
+    #puts encrypted_message
     client.puts({'encrypted_message' => encrypted_message}.to_json)
   end
   puts "the public key from the client is "
