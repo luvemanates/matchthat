@@ -29,17 +29,6 @@ def decode64(string)
   Base64.decode64(string)
 end
 
-def convert_utf8(string)
-  string = string.to_s unless string.is_a?(String)
-  string.force_encoding("ISO-8859-1").encode("UTF-8")
-end
-
-def convert_ascii8bit(string)
-  string = string.to_s unless string.is_a?(String)
-#  string.force_encoding('ASCII-8BIT')  
-  string.force_encoding("ISO-8859-1").encode('ASCII-8BIT')
-end
-
 loop {
   client = server.accept
   params = JSON.parse(client.gets)
