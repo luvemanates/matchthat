@@ -48,9 +48,11 @@ loop {
     puts "sending message with encoding " 
     puts encrypted_message_utf8.encoding
     client.puts({'encrypted_message' => encrypted_message_utf8}.to_json)
-    params = JSON.parse(client.gets)
-    puts "returning from client after decrypt"
-    puts params
+
+    #params = JSON.parse(client.gets)
+    #puts "returning from client after decrypt"
+    #puts params
+    client.puts({'public_key' => encode64(matchthatmint_crypto.public_key.to_s)}.to_json)
   end
   #client.puts params[:public_key ]
   #raise params.inspect

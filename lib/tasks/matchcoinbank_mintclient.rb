@@ -34,12 +34,15 @@ puts params
   encrypted_message = decode64(encrypted_message)
 
   decrypted_message = bank_crypto.decrypt_message_with_private_key(encrypted_message)
-  puts "decrypted message"
   puts "\n\n"
   puts "decrypted mesage IS "
   puts decrypted_message
 
   #here is where we need to get the public key and encrypt it with the decrypted_message
 #end
+response = bank_client_socket.gets
+params = JSON.parse(response) unless response.nil?
+puts "params is "
+puts params
 bank_client_socket.close
 
