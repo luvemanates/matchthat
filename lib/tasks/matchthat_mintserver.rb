@@ -54,9 +54,18 @@ loop {
     #puts params
     client.puts({'public_key' => encode64(matchthatmint_crypto.public_key.to_s)}.to_json)
   end
+  params = JSON.parse(client.gets)
+  puts "params parsed"
+  puts params
+  client_response = decode64(params["encrypted_secret"])
+  decrypted_message = matchthatmint_crypto.decrypt_message_with_private_key(client_response)
+  puts decrypted_message
+  puts "VERIFIED" if decrypted_message == random_secret
+
   #client.puts params[:public_key ]
   #raise params.inspect
 }
+client.close
 
 =begin
 loop do

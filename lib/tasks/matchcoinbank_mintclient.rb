@@ -44,5 +44,9 @@ response = bank_client_socket.gets
 params = JSON.parse(response) unless response.nil?
 puts "params is "
 puts params
+server_public_key = decode64(params["public_key"])
+encrypted_secret = bank_crypto.encrypt_message_with_recipient_public_key(server_public_key, decrypted_message)
+bank_client_socket.puts( {"encrypted_secret" => encode64(encrypted_secret) }.to_json )
+puts "sent encrypted secret"
 bank_client_socket.close
 
