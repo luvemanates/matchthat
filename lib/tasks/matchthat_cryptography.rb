@@ -89,6 +89,9 @@ class MatchThatCipher
   attr_accessor :cipher_iv
   attr_accessor :decipher
 
+  def initialize
+  end
+
   def setup_cipher
     @cipher = OpenSSL::Cipher::AES.new(128, :CBC)
     @cipher.encrypt
@@ -101,11 +104,11 @@ class MatchThatCipher
     return encode64(encrypted)
   end
 
-  def setup_decipher
+  def setup_decipher(key, iv)
     @decipher = OpenSSL::Cipher::AES.new(128, :CBC)
     @decipher.decrypt
-    @decipher.key = @cipher_key
-    @decipher.iv = @cipher_iv
+    @decipher.key = key
+    @decipher.iv = iv
   end
 
   def decrypt_with_cipher(encrypted_data)

@@ -59,7 +59,8 @@ class MintServer
         encrypted_message_utf8 = encode64(encrypted_message)
         puts "sending message with encoding " 
         puts encrypted_message_utf8.encoding
-        client.puts({'encrypted_cipher' => encrypted_message_utf8, "encryped_cipher_iv" => encode64(@cipher_iv)}.to_json)
+        encrypted_cipher_iv = matchthatmint_crypto.encrypt_message_with_recipient_public_key(client_public_key, matchthat_cipher.cipher_iv)
+        client.puts({'encrypted_cipher' => encrypted_message_utf8, "encrypted_cipher_iv" => encode64(encrypted_cipher_iv)}.to_json)
 
         #params = JSON.parse(client.gets)
         #puts "returning from client after decrypt"
@@ -76,7 +77,12 @@ class MintServer
 
       #client.puts params[:public_key ]
       #raise params.inspect
+      data = "I sent this message - later it should turn into a coin"
+      ciphered_message = matchthat_cipher.encrypt_with_cipher(data) 
+      ciphered_message = encode64(ciphered_message)
+      client.puts({'ciphered_message' => ciphered_message}.to_json)
     }
+
     client.close
 
 =begin
