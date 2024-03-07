@@ -82,3 +82,35 @@ class MatchThatCryptography
   end
 end
 
+class MatchThatCipher
+
+  attr_accessor :cipher
+  attr_accessor :cipher_key
+  attr_accessor :cipher_iv
+  attr_accessor :decipher
+
+  def setup_cipher
+    @cipher = OpenSSL::Cipher::AES.new(128, :CBC)
+    @cipher.encrypt
+    @cipher_key = @cipher.random_key
+    @cipher_iv = @cipher.random_iv
+  end
+
+  def encrypt_with_cipher(data)
+    encrypted = @cipher.update(data) + @cipher.final
+    return encode64(encrypted)
+  end
+
+  def setup_decipher
+    @decipher = OpenSSL::Cipher::AES.new(128, :CBC)
+    @decipher.decrypt
+    @decipher.key = @cipher_key
+    @decipher.iv = @cipher_iv
+  end
+
+  def decrypt_with_cipher(encrypted_data)
+    data_to_decrypt = decode64(encrypted_data)
+    plain = @decipher.update( data_to_decrypt ) + @decipher.final
+    return plain
+  end
+end
