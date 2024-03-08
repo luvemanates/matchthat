@@ -2,6 +2,7 @@ require 'socket'
 require 'json'
 require_relative 'matchthat_cryptography'
 require_relative 'digital_wallet'
+require_relative 'centralized_exchange'
 
 
 def encode64(string)
@@ -26,6 +27,7 @@ class MintClientBank
   def initialize
     @bank_crypto = MatchThatCryptography.new(MatchThatCryptography::CONFIG)
     @bank_wallet = DigitalWallet.new('Bank Wallet', @bank_crypto)
+    @exchange = CentralizedExchange.new
   end
 
   #so one way to transfer funds would be to have a secret inside the coin that is
@@ -46,7 +48,7 @@ class MintClientBank
       
       @decipher.setup_decipher(@cipher_key, @cipher_iv)
 
-      data["wallet_public_key"] = @decipher.decrypt_with_cipher(decode64(params["wallet_public_key"]))
+      data["wallet_identification"] = @decipher.decrypt_with_cipher(decode64(params["wallet_identification"]))
       data["coin_serial_number"] = @decipher.decrypt_with_cipher(decode64(params["coin_serial_number"]))
       data["coin_face_value"] = @decipher.decrypt_with_cipher(decode64(params["coin_face_value"]))
       puts "data is "

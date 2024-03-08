@@ -8,6 +8,7 @@ class CentralizedExchange
   #this should also keep a record of what is minted, and what isn't
 
   attr_accessor :coins
+  attr_accessor :wallets
 
   def initialize(coins=[])
     @coins = coins

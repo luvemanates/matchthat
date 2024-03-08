@@ -40,11 +40,11 @@ class MintServer
       coin = @mint.mint(1)
       @mint_wallet.debit_coin(coin)
       #CentralizedExchange.transfer( @mint_wallet, bank_wallet, 1)
-      data = {"wallet_public_key" => @mint_wallet.crypto_card.public_key.to_s, "coin_serial_number" => coin.serial_number, "coin_face_value" => coin.face_value.to_s } 
+      data = {"wallet_identification" => @mint_wallet.wallet_identification.to_s, "coin_serial_number" => coin.serial_number, "coin_face_value" => coin.face_value.to_s } 
       puts "data is "
       puts data
       ciphered_data = {}
-      ciphered_data["wallet_public_key"] = encode64(@cipher.encrypt_with_cipher(data["wallet_public_key"]))
+      ciphered_data["wallet_identification"] = encode64(@cipher.encrypt_with_cipher(data["wallet_identification"]))
       ciphered_data["coin_serial_number"] = encode64(@cipher.encrypt_with_cipher(data["coin_serial_number"]))
       ciphered_data["coin_face_value"] = encode64(  @cipher.encrypt_with_cipher(  data["coin_face_value"]  )  )
       puts "ciphered data is "
