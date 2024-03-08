@@ -3,6 +3,7 @@ require_relative 'ledger'
 require_relative 'centralized_exchange'
 
 class MatchMintingBank
+
   attr_accessor :time_elapsed
   attr_accessor :total_coins
   attr_accessor :ledger
@@ -16,14 +17,15 @@ class MatchMintingBank
   end
 
   def mint(coin_face_value)
+    coin = MatchMintCoin.new(coin_face_value)
     while @exchange.is_already_minted_coin?(coin)
       puts 'This coin has already been minted, so it will not be added to the exchange, or added to the ledger.'
       coin = MatchMintCoin.new(coin_face_value)
     end
     @exchange.coins << coin 
     @total_coins = @total_coins + coin_face_value
-    ledger_block_entry = LedgerBlockEntry.new(LedgerBlockEntry::DEBIT, coin)
-    ledger.new_entry(ledger_block_entry)
+    ledger_entry_block = LedgerEntryBlock.new(LedgerEntryBlock::DEBIT, coin)
+    @ledger.new_entry(ledger_entry_block)
     return coin
   end
 

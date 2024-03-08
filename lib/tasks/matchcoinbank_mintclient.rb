@@ -28,22 +28,31 @@ class MintClientBank
     @bank_wallet = DigitalWallet.new('Bank Wallet', @bank_crypto)
   end
 
+  #so one way to transfer funds would be to have a secret inside the coin that is
+  #sent to the CentralExchange which authorizes any transfers - and stores the wallet
+  #its currently cointained in
+  #so the central exchange authorizes and stores the new wallet info for that coin
+  #maybe a central exchange should be allowed to lock coins that way nothing can happen to it
+  #in the middle of transfer
   def run
-    response = @bank_client.gets
-    puts "response is "
-    puts response
-    params = JSON.parse(response) unless response.nil?
+    loop do
+      response = @bank_client.gets
+      puts "response is "
+      puts response
+      params = JSON.parse(response) unless response.nil?
+      data = {}
 
-    encrypted_message = decode64(params["ciphered_message"])
+      @decipher = MatchThatCipher.new
+      
+      @decipher.setup_decipher(@cipher_key, @cipher_iv)
 
-    @cipher = MatchThatCipher.new
-    
-    @cipher.setup_decipher(@cipher_key, @cipher_iv)
-
-    message = @cipher.decrypt_with_cipher(encrypted_message)
-    puts "message is "
-    puts message
-    #@bank_client.close
+      data["wallet_public_key"] = @decipher.decrypt_with_cipher(decode64(params["wallet_public_key"]))
+      data["coin_serial_number"] = @decipher.decrypt_with_cipher(decode64(params["coin_serial_number"]))
+      data["coin_face_value"] = @decipher.decrypt_with_cipher(decode64(params["coin_face_value"]))
+      puts "data is "
+      puts data
+    end
+    @bank_client.close
   end
 
   def secure_connection

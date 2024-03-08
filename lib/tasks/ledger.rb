@@ -4,23 +4,23 @@ class Ledger
   attr_accessor :current_ledger_amount #should be all the debit - all the credits
 
   def initialize(ledger_name="Default Ledger Name", ledger_entry_blocks=[], current_ledger_amount=0)
-    self.ledger_name = ledger_name
-    self.ledger_entry_blocks = ledger_entry_blocks
-    self.current_ledger_amount = current_ledger_amount
+    @ledger_name = ledger_name
+    @ledger_entry_blocks = ledger_entry_blocks
+    @current_ledger_amount = current_ledger_amount
   end
 
   def new_entry(new_ledger_block)
-    self.current_ledger_blocks << new_ledger_block
+    @ledger_entry_blocks << new_ledger_block
     update_amount
   end
 
   def update_amount
     credits = 0
     debits = 0
-    for entry_block in self.ledger_entry_blocks
-      if entry_block.ledger_entry_type == LedgerEntryBLock::CREDIT
+    for entry_block in @ledger_entry_blocks
+      if entry_block.ledger_entry_type == LedgerEntryBlock::CREDIT
         credits -= entry_block.entry_amount
-      elsif entry_block.ledger_entry_type == LedgerEntryBLock::DEBIT
+      elsif entry_block.ledger_entry_type == LedgerEntryBlock::DEBIT
         debits += entry_block.entry_amount
       end
     end
@@ -31,15 +31,15 @@ class Ledger
   def can_verify_current_ledger_amount?
     credits = 0
     debits = 0
-    for entry_block in self.ledger_entry_blocks
-      if entry_block.ledger_entry_type == LedgerEntryBLock::CREDIT
+    for entry_block in @ledger_entry_blocks
+      if entry_block.ledger_entry_type == LedgerEntryBlock::CREDIT
         credits -= entry_block.entry_amount
-      elsif entry_block.ledger_entry_type == LedgerEntryBLock::DEBIT
+      elsif entry_block.ledger_entry_type == LedgerEntryBlock::DEBIT
         debits += entry_block.entry_amount
       end
     end
     current_tally = debits - credits
-    if current_tally == self.current_ledger_amount #should be all the debit - all the credits
+    if current_tally == @current_ledger_amount #should be all the debit - all the credits
       return true
     else
       return false
@@ -57,9 +57,9 @@ class LedgerEntryBlock
   attr_accessor :coin_serial_number
 
   def initialize(ledger_entry_type, coin)
-    self.ledger_entry_type = ledger_entry_type
-    self.entry_amount = coin.face_value 
-    self.coin_serial_number = coin.serial_number
+    @ledger_entry_type = ledger_entry_type
+    @entry_amount = coin.face_value 
+    @coin_serial_number = coin.serial_number
   end
 end
 

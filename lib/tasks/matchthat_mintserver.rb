@@ -37,15 +37,19 @@ class MintServer
 
 
   def run
-      #coin = mint.mint(1)
-      #@exchange.coins << coin
-      #@mint_wallet.debit_coin(coin)
-
+      coin = @mint.mint(1)
+      @mint_wallet.debit_coin(coin)
       #CentralizedExchange.transfer( @mint_wallet, bank_wallet, 1)
-      data = "I sent this message - later it should turn into a coin"
-      ciphered_message = @cipher.encrypt_with_cipher(data) 
-      ciphered_message = encode64(ciphered_message)
-      @client.puts({'ciphered_message' => ciphered_message}.to_json)
+      data = {"wallet_public_key" => @mint_wallet.crypto_card.public_key.to_s, "coin_serial_number" => coin.serial_number, "coin_face_value" => coin.face_value.to_s } 
+      puts "data is "
+      puts data
+      ciphered_data = {}
+      ciphered_data["wallet_public_key"] = encode64(@cipher.encrypt_with_cipher(data["wallet_public_key"]))
+      ciphered_data["coin_serial_number"] = encode64(@cipher.encrypt_with_cipher(data["coin_serial_number"]))
+      ciphered_data["coin_face_value"] = encode64(  @cipher.encrypt_with_cipher(  data["coin_face_value"]  )  )
+      puts "ciphered data is "
+      puts ciphered_data
+      @client.puts(ciphered_data.to_json)
 
       loop do
 =begin
