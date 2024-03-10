@@ -1,8 +1,14 @@
+require_relative '../../config/environment'
 require_relative 'mint'
 require_relative 'blockchain'
 require_relative 'digital_wallet'
 require_relative 'matchthat_cryptography'
 
+matches = Match.all
+for match in matches
+  puts match.title
+end
+=begin
 common = {
   :key_length  => 4096,
   :digest_func => OpenSSL::Digest::SHA256.new
@@ -40,6 +46,7 @@ while(true) #thread = Thread.new {
   puts "Hash: #{added_block.hash}"
   puts "\n"
 end
+=end
 
 
 

@@ -1,6 +1,7 @@
 require 'securerandom'
 require_relative 'ledger'
 require_relative 'centralized_exchange'
+require_relative 'matchthat_cryptography'
 
 class MatchMintingBank
 
@@ -33,14 +34,17 @@ end
 
 
 # A non fungible coin
+# Needs its own private key that is created for any new owners of the coin
 class MatchMintCoin #or match coin
   attr_accessor :serial_number
   attr_writer :created_at
   attr_accessor :face_value
+  attr_accessor :crypto_card 
 
   def initialize(face_value = 1)
-    self.serial_number = SecureRandom.uuid 
-    self.created_at = Time.now
-    self.face_value = face_value
+    @serial_number = SecureRandom.uuid 
+    @created_at = Time.now
+    @face_value = face_value
+    @crypto_card = MatchThatCryptography.new(MatchThatCryptography::CONFIG, "coin card")
   end
 end

@@ -7,6 +7,12 @@ class CentralizedExchange
 
   #this should also keep a record of what is minted, and what isn't
 
+  #another thing this class should do is verify valid wallets along with valid coins
+
+  #it may actually be good to have multiple exchanges --- but they'll need to be able to connect to each other to verify blockchain like bitcoin
+  # the thing about this though is having more than one centralized exchange on one machine doesn't make sense (perhaps would should issue a api key and have
+  # tiers like RFID and passports
+
   attr_accessor :coins
   attr_accessor :wallets
 
@@ -34,6 +40,7 @@ class CentralizedExchange
   def self.transfer(sender_wallet, receiver_wallet, amount=1)
     #use the crypto card to ask for auth for a credit on the sender with receiver ident
     #auth = sender_wallet.request_credit_auth_from(receiver_wallet)
+    # This is where the private keys for each coin need to be re-made (like changing the locks after a new owner is moved in.
     tx_coin = sender_wallet.credit_coin
     receiver_wallet.debit_coin(tx_coin)
   end

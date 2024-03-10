@@ -15,11 +15,11 @@ class MatchThatCryptography
   attr_accessor :public_key
   attr_accessor :card_name
 
-  def initialize(conf=CONFIG)
+  def initialize(conf=CONFIG, name="default card")
     @config = conf
     @keypair = OpenSSL::PKey::RSA.new(@config[:key_length])
     @public_key  = OpenSSL::PKey::RSA.new(@keypair.public_key.to_der)
-    @name = 'default card'
+    @name = name 
   end
 
 =begin
