@@ -83,6 +83,7 @@ GEM
     bindex (0.8.1)
     bootsnap (1.18.3)
       msgpack (~> 1.2)
+    bson (4.15.0)
     builder (3.2.4)
     capybara (3.40.0)
       addressable
@@ -136,6 +137,13 @@ GEM
     matrix (0.4.2)
     mini_mime (1.1.5)
     minitest (5.21.2)
+    mongo (2.19.3)
+      bson (>= 4.14.1, < 5.0.0)
+    mongoid (8.1.5)
+      activemodel (>= 5.1, < 7.2, != 7.0.0)
+      concurrent-ruby (>= 1.0.5, < 2.0)
+      mongo (>= 2.18.0, < 3.0.0)
+      ruby2_keywords (~> 0.0.5)
     msgpack (1.7.2)
     mutex_m (0.2.0)
     mysql2 (0.5.5)
@@ -258,6 +266,7 @@ DEPENDENCIES
   devise
   importmap-rails
   jbuilder
+  mongoid
   mysql2
   puma (>= 5.0)
   rails (~> 7.1.2)

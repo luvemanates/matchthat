@@ -1,4 +1,5 @@
-
+require '../../config/environment'
+require 'mongoid'
 require 'socket'
 require 'json'
 require_relative 'mint'
@@ -30,14 +31,25 @@ class MintServer
 
   def initialize
     @mint = MatchMintingBank.new 
-    @crypto = MatchThatCryptography.new(MatchThatCryptography::CONFIG)
-    @mint_wallet = DigitalWallet.new('mint_wallet', @crypto)
+    @mint_wallet = DigitalWallet.new(:wallet_name => 'Mint Wallet')
+
+    existing_crypto = MatchThatCryptography.where(:card_name => 'mint wallet crypto card').first
+    unless existing_crypto
+      @crypto = MatchThatCryptography.new(:card_name => 'mint wallet crypto card')
+      #@crypto.crypto_card_carrier = @mint
+      @crypto.save
+    else
+      @crypto = existing_crypto
+      @crypto.ssobject_load
+    end
+
+
     @exchange = CentralizedExchange.new
   end
 
 
   def run
-      coin = @mint.mint(1)
+      coin = @mint.mint()
       @mint_wallet.debit_coin(coin)
       #CentralizedExchange.transfer( @mint_wallet, bank_wallet, 1)
       data = {"wallet_identification" => @mint_wallet.wallet_identification.to_s, "coin_serial_number" => coin.serial_number, "coin_face_value" => coin.face_value.to_s } 
@@ -105,7 +117,9 @@ end
       #params = JSON.parse(client.gets)
       #puts "returning from client after decrypt"
       #puts params
-      @client.puts({'public_key' => encode64(@crypto.public_key.to_s)}.to_json)
+      #puts "sending public_key" 
+      #puts @crypto.public_key.to_s
+      @client.puts({'public_key' => @crypto.public_key.to_s}.to_json)
     end
     params = JSON.parse(@client.gets)
     puts "params parsed"

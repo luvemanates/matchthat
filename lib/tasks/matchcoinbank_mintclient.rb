@@ -1,3 +1,5 @@
+require '../../config/environment'
+require 'mongoid'
 require 'socket'
 require 'json'
 require_relative 'matchthat_cryptography'
@@ -25,8 +27,25 @@ class MintClientBank
   attr_accessor :ciphera_iv
 
   def initialize
-    @bank_crypto = MatchThatCryptography.new(MatchThatCryptography::CONFIG)
-    @bank_wallet = DigitalWallet.new('Bank Wallet', @bank_crypto)
+
+    existing_bank_crypto = MatchThatCryptography.where(:Card_name => "Mint Bank Wallet Crypto Card").first
+    unless existing_bank_crypto
+      @bank_crypto = MatchThatCryptography.new(:card_name => "Mint Bank Wallet Crypto Card")
+      @bank_crypto.crypto_card_carrier = @bank_wallet
+      @bank_crypto.save
+    else
+      @bank_crypto = existing_bank_crypto
+      @bank_crypto.ssobject_load
+    end
+
+    bank_wallet = DigitalWallet.where(:wallet_name => 'Bank Wallet')
+    unless bank_wallet
+      @bank_wallet = DigitalWallet.new(:wallet_name => 'Bank Wallet')
+      @bank_wallet.save
+    else
+      @bank_wallet = bank_wallet
+    end
+
     @exchange = CentralizedExchange.new
   end
 
@@ -61,7 +80,7 @@ class MintClientBank
     host = 'localhost'
     port = 2000
     @bank_client = TCPSocket.open(host, port)
-    request = { 'public_key' => encode64(@bank_crypto.public_key) }.to_json
+    request = { 'public_key' => @bank_crypto.public_key }.to_json
     @bank_client.puts(request)
     response = @bank_client.gets
     params = JSON.parse(response) unless response.nil?
@@ -90,6 +109,8 @@ class MintClientBank
     puts "params is "
     puts params
     server_public_key = decode64(params["public_key"])
+    puts "server_public_key is"
+    puts server_public_key
     encrypted_secret = @bank_crypto.encrypt_message_with_recipient_public_key(server_public_key, decrypted_message)
     @bank_client.puts( {"encrypted_secret" => encode64(encrypted_secret) }.to_json )
     puts "sent encrypted secret"

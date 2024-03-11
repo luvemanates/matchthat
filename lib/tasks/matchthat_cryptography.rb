@@ -1,25 +1,45 @@
 
+require 'mongoid'
 require 'base64'
 require 'openssl'
 
 
 class MatchThatCryptography
 
+  include Mongoid::Document
+  include Mongoid::Timestamps
+
   CONFIG = {
     :key_length  => 4096,
     :digest_func => OpenSSL::Digest::SHA256.new
   }
 
-  attr_accessor :config
-  attr_accessor :keypair
-  attr_accessor :public_key
-  attr_accessor :card_name
+  belongs_to :crypto_card_carrier, :polymorphic => true
 
-  def initialize(conf=CONFIG, name="default card")
-    @config = conf
-    @keypair = OpenSSL::PKey::RSA.new(@config[:key_length])
-    @public_key  = OpenSSL::PKey::RSA.new(@keypair.public_key.to_der)
-    @name = name 
+
+  field :private_key
+  field :public_key
+  field :card_name
+
+  attr_accessor :config
+  attr_accessor :ss_private_key
+  attr_accessor :ss_public_key
+
+  def initialize(params={:card_name => 'default card'})
+    keypair = OpenSSL::PKey::RSA.new(CONFIG[:key_length])
+    @private_key = Base64.encode64(keypair.private_to_pem)
+    @public_key  = Base64.encode64(keypair.public_to_pem) #OpenSSL::PKey::RSA.new(@keypair.public_key.to_der)
+    @card_name = params[:card_name] 
+    params[:private_key] = @private_key
+    params[:public_key] = @public_key
+    params[:card_name] = @card_name
+    super(params)
+  end
+
+  #need to decode and objectify database data - it would be nice to use the marshalling method
+  def ssobject_load
+    @ss_private_key = OpenSSL::PKey::RSA.new( Base64.decode64( @private_key) )
+    @ss_public_key = OpenSSL::PKey::RSA.new( Base64.decode64( @public_key) )
   end
 
 =begin
@@ -40,7 +60,10 @@ class MatchThatCryptography
   end
 
   def decrypt_message_with_private_key(encrypted_message)
-    decrypted_message = @keypair.private_decrypt(encrypted_message)
+    if @private_key.is_a?(String)
+      @private_key = OpenSSL::PKey::RSA.new( Base64.decode64( @private_key) )
+    end
+    decrypted_message = @private_key.private_decrypt(encrypted_message)
     return decrypted_message
   end
 
@@ -74,7 +97,7 @@ class MatchThatCryptography
     puts "Decrypted:"
     puts decrypted
 
-    if from_party[:pubkey].verify(@config[:digest_func], signature, decrypted)
+    if from_party[:pubkey].verify(CONFIG[:digest_func], signature, decrypted)
             puts "Verified!"
     end
     return decrypted_secret

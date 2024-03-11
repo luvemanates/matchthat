@@ -1,23 +1,39 @@
+require 'mongoid'
 require 'securerandom'
 require_relative 'ledger'
 #how do we verify a wallet isn't just creating as many coins as it wants?
 #the bank ledger should perhaps own and issue the wallet even if someone else is using it.
 
 class DigitalWallet
-  attr_reader :balance
-  attr_accessor :crypto_card #crypto card needs to have its own private key, and password
-  attr_accessor :wallet_name
-  attr_accessor :ledger #each wallet should have its own ledger for credits and debits
-  attr_accessor :coins
-  attr_reader :wallet_identification
+  include Mongoid::Document
+  include Mongoid::Timestamps
 
-  def initialize(wallet_name, crypto_card, coins=[], ledger=Ledger.new)
-    @wallet_name = wallet_name
-    @crypto_card = crypto_card
-    @coins = coins
-    @ledger = ledger
-    @balance = ledger.current_ledger_amount
-    @wallet_identification = SecureRandom.uuid
+  has_one :crypto_card, :as => :crypto_card_carrier #crypto card needs to have its own private key, and password
+  has_one :ledger #each wallet should have its own ledger for credits and debits
+
+  has_many :coins
+
+  field :wallet_name
+  field :balance
+  field :wallet_identification
+
+  after_create :do_crypto_card, :do_ledger
+
+  def initialize(params={:wallet_name => 'Default Wallet', :balance => 0, :wallet_identification => SecureRandom.uuid})
+    super(params)
+  end
+
+  def do_ledger
+    ledger = Ledger.new(:ledger_name => self.wallet_name + " Ledger")
+    ledger.digital_wallet = self
+    ledger.save
+  end
+
+  def do_crypto_card
+    #return if MatchThatCryptography.where(
+    @crypto_card = MatchThatCryptography.new
+    @crypto_card.crypto_card_carrier = self
+    @crypto_card.save
   end
 
   #need to ensure we are not trying to debit the same coin twice
