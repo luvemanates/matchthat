@@ -22,7 +22,7 @@ class Ledger
   def update_amount
     credits = 0
     debits = 0
-    for entry_block in @ledger_entry_blocks
+    for entry_block in self.ledger_entry_blocks
       if entry_block.ledger_entry_type == LedgerEntryBlock::CREDIT
         credits -= entry_block.entry_amount
       elsif entry_block.ledger_entry_type == LedgerEntryBlock::DEBIT
@@ -36,7 +36,7 @@ class Ledger
   def can_verify_current_ledger_amount?
     credits = 0
     debits = 0
-    for entry_block in @ledger_entry_blocks
+    for entry_block in self.ledger_entry_blocks
       if entry_block.ledger_entry_type == LedgerEntryBlock::CREDIT
         credits -= entry_block.entry_amount
       elsif entry_block.ledger_entry_type == LedgerEntryBlock::DEBIT
@@ -67,14 +67,23 @@ class LedgerEntryBlock
   field :coin_serial_number
   field :coin_face_value
 
+  #It would probably be better accounting to have a balance update in the entry
+  #field :new_balance
+
   CREDIT = "credit"
   DEBIT = "debit"
 
-  def initialize(ledger_entry_type, coin)
-    @ledger_entry_type = ledger_entry_type
-    @entry_amount = coin.face_value 
-    @coin_serial_number = coin.serial_number
-    @coin_face_value = coin.face_value
+  def initialize(params)
+    @ledger_entry_type = params[:ledger_entry_type]
+    @entry_amount = params[:coin].face_value 
+    @coin_serial_number = params[:coin].serial_number
+    @coin_face_value = params[:coin].face_value
+
+    params[:entry_amount] = params[:coin].face_value 
+    params[:coin_serial_number] = params[:coin].serial_number
+    params[:coin_face_value] = params[:coin].face_value
+    params.delete(:coin)
+    super(params)
   end
 end
 

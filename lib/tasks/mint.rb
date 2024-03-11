@@ -26,10 +26,11 @@ class MatchMintingBank
       puts 'This coin has already been minted, so it will not be added to the exchange, or added to the ledger.'
       coin = MatchMintCoin.new(coin_face_value)
     end
+    coin.save
     @ledger = Ledger.new(:ledger_name => 'MatchMint Ledger') if @ledger.nil?
     @exchange.coins << coin 
     @total_coins = @total_coins + params[:face_value]
-    ledger_entry_block = LedgerEntryBlock.new(LedgerEntryBlock::DEBIT, coin)
+    ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::DEBIT, :coin => coin)
     ledger_entry_block.ledger = @ledger
     @ledger.new_entry(ledger_entry_block)
     return coin

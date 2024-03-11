@@ -38,19 +38,19 @@ class DigitalWallet
 
   #need to ensure we are not trying to debit the same coin twice
   def debit_coin(coin)
-    ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::DEBIT, coin)
-    @ledger.ledger_entry_blocks << ledger_entry_block
-    @coins << coin
+    ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::DEBIT, :coin => coin)
+    self.ledger.ledger_entry_blocks << ledger_entry_block
+    self.coins << coin
     @balance += coin.face_value
   end
 
   #there needs to be something better here if minting face values less or more than 1
   def credit_coin 
     coin = @coins.last
-    @coins.delete(coin)
-    ledger_entry_block = LedgerEntryBlock.new( LedgerEntryBlock::CREDIT, coin)
-    @ledger.ledger_entry_blocks << ledger_entry_block
-    @balance -= coin.face_value
+    self.coins.delete(coin)
+    ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::CREDIT, :coin => coin)
+    self.ledger.ledger_entry_blocks << ledger_entry_block
+    self.balance -= coin.face_value
     return coin
   end
 
