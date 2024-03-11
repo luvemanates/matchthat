@@ -19,7 +19,16 @@ class DigitalWallet
 
   after_create :do_crypto_card, :do_ledger
 
-  def initialize(params={:wallet_name => 'Default Wallet', :balance => 0, :wallet_identification => SecureRandom.uuid})
+  def initialize(params={})
+    if params[:wallet_name].nil?
+      params[:wallet_name] = 'Default Wallet'
+    end
+    if params[:balance].nil?
+      params[:balance] = 0
+    end
+    if params[:wallet_identification].nil?
+      params[:wallet_identification] = SecureRandom.uuid
+    end
     super(params)
   end
 
