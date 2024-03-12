@@ -20,8 +20,8 @@ class MatchMintingBank
     @exchange = CentralizedExchange.new
   end
 
-  def mint(params = {:face_value => 1})
-    coin = MatchMintCoin.new(:face_value => params[:face_value])
+  def mint(params = {:face_value => 1, :digital_wallet => digital_wallet})
+    coin = MatchMintCoin.new(:face_value => params[:face_value], :digital_wallet => params[:digital_wallet])
     while @exchange.is_already_minted_coin?(coin)
       puts 'This coin has already been minted, so it will not be added to the exchange, or added to the ledger.'
       coin = MatchMintCoin.new(coin_face_value)
@@ -49,6 +49,7 @@ class MatchMintCoin #or match coin
   field :created_at
   field :face_value
   has_one :crypto_card, :as => :crypto_card_carrier 
+  belongs_to :digital_wallet
 
   #attr_accessor :serial_number
   #attr_writer :created_at
@@ -57,11 +58,16 @@ class MatchMintCoin #or match coin
   after_create :do_crypto_card
 
   def initialize(params = ({face_value: 1, serial_number: SecureRandom.uuid}))
+    puts "params is "
+    puts params.inspect
     if params['face_value'].nil?
       params['face_value'] = 1
     end
     if params['serial_number'].nil?
       params['serial_number'] = SecureRandom.uuid
+    end
+    if params[:digital_wallet].nil?
+      throw "No wallet found"
     end
     #crypto_card = MatchThatCryptography.new(:card_name => "coin card")
     #@crypto_card = crypto_card.save 

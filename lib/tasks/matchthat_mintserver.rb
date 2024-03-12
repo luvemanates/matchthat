@@ -31,7 +31,12 @@ class MintServer
 
   def initialize
     @mint = MatchMintingBank.new 
-    @mint_wallet = DigitalWallet.new(:wallet_name => 'Mint Wallet')
+
+    @mint_wallet = DigitalWallet.where(:wallet_name => 'Mint Wallet').first
+    unless @mint_wallet
+      @mint_wallet = DigitalWallet.new(:wallet_name => 'Mint Wallet')
+      @mint_wallet.save
+    end
 
     existing_crypto = MatchThatCryptography.where(:card_name => 'mint wallet crypto card').first
     unless existing_crypto
@@ -49,7 +54,7 @@ class MintServer
 
 
   def run
-      coin = @mint.mint()
+      coin = @mint.mint(:face_value => 1, :digital_wallet => @mint_wallet)
       #@mint_wallet.debit_coin(coin)
       #CentralizedExchange.transfer( @mint_wallet, bank_wallet, 1)
       data = {"wallet_identification" => @mint_wallet.wallet_identification.to_s, "coin_serial_number" => coin.serial_number, "coin_face_value" => coin.face_value.to_s } 
