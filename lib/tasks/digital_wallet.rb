@@ -51,14 +51,19 @@ class DigitalWallet
     ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::DEBIT, :coin => coin)
     self.ledger.ledger_entry_blocks << ledger_entry_block
     self.coins << coin
-    @balance += coin.face_value
+    puts "debit coin is "
+    puts coin.inspect
+    self.balance += coin.face_value
   end
 
   #there needs to be something better here if minting face values less or more than 1
   def credit_coin 
-    coin = @coins.last
-    self.coins.delete(coin)
-    ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::CREDIT, :coin => coin)
+    coins = MatchMintCoin.where(:digital_wallet_id => self.id) 
+    #self.coins.delete(coin)
+    coin = coins.first
+    puts "coin credit is "
+    puts coin.inspect
+    ledger_entry_block = LedgerEntryBlock.new({:ledger_entry_type => LedgerEntryBlock::CREDIT, :coin => coin})
     self.ledger.ledger_entry_blocks << ledger_entry_block
     self.balance -= coin.face_value
     return coin
@@ -70,7 +75,7 @@ class DigitalWallet
   end
 
   def check_balance
-    puts "The current balance of " + @wallet_name.to_s + " #{@balance}."
+    puts "The current balance of " + self.wallet_name.to_s + " #{self.balance}."
   end
 end
 

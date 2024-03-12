@@ -55,7 +55,8 @@ class MintServer
 
   def run
       coin = @mint.mint(:face_value => 1, :digital_wallet => @mint_wallet)
-      #@mint_wallet.debit_coin(coin)
+      @mint_wallet.debit_coin(coin)
+      @mint_wallet.check_balance
       #CentralizedExchange.transfer( @mint_wallet, bank_wallet, 1)
       data = {"wallet_identification" => @mint_wallet.wallet_identification.to_s, "coin_serial_number" => coin.serial_number, "coin_face_value" => coin.face_value.to_s } 
       puts "data is "

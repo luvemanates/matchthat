@@ -1,4 +1,5 @@
 require_relative 'mint'
+require_relative 'digital_wallet'
 
 class CentralizedExchange
 
@@ -41,7 +42,13 @@ class CentralizedExchange
     #use the crypto card to ask for auth for a credit on the sender with receiver ident
     #auth = sender_wallet.request_credit_auth_from(receiver_wallet)
     # This is where the private keys for each coin need to be re-made (like changing the locks after a new owner is moved in.
+    sender_wallet.check_balance
+    puts "crediting coin from wallet identification: " + sender_wallet.wallet_identification
     tx_coin = sender_wallet.credit_coin
+    sender_wallet.check_balance
+    puts "debiting coin from wallet identification: " + receiver_wallet.wallet_identification
+    receiver_wallet.check_balance
     receiver_wallet.debit_coin(tx_coin)
+    receiver_wallet.check_balance
   end
 end

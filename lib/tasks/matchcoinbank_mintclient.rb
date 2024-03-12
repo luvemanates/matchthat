@@ -38,7 +38,7 @@ class MintClientBank
       @bank_crypto.ssobject_load
     end
 
-    bank_wallet = DigitalWallet.where(:wallet_name => 'Bank Wallet')
+    bank_wallet = DigitalWallet.where(:wallet_name => 'Bank Wallet').first
     unless bank_wallet
       @bank_wallet = DigitalWallet.new(:wallet_name => 'Bank Wallet')
       @bank_wallet.save
@@ -72,6 +72,10 @@ class MintClientBank
       data["coin_face_value"] = @decipher.decrypt_with_cipher(decode64(params["coin_face_value"]))
       puts "data is "
       puts data
+      puts "starting transfer"
+      mint_wallet = DigitalWallet.where(:wallet_identification => data["wallet_identification"]).first
+      puts mint_wallet.inspect
+      CentralizedExchange.transfer(mint_wallet, @bank_wallet, data["coin_face_value"])
     end
     @bank_client.close
   end

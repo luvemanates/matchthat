@@ -75,6 +75,8 @@ class LedgerEntryBlock
 
   def initialize(params)
     @ledger_entry_type = params[:ledger_entry_type]
+    puts "inspecting params passed to ledger"
+    puts params.inspect
     @entry_amount = params[:coin].face_value 
     @coin_serial_number = params[:coin].serial_number
     @coin_face_value = params[:coin].face_value
