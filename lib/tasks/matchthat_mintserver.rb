@@ -54,6 +54,7 @@ class MintServer
 
 
   def run
+    loop do
       coin = @mint.mint(:face_value => 1, :digital_wallet => @mint_wallet)
       @mint_wallet.debit_coin(coin)
       @mint_wallet.check_balance
@@ -68,22 +69,6 @@ class MintServer
       puts "ciphered data is "
       puts ciphered_data
       @client.puts(ciphered_data.to_json)
-
-      loop do
-=begin
-loop do
-  client = server.accept    # Wait for a client to connect
-  # Send a message to the client
-  coin = mint.mint(1)
-  exchange.coins << coin
-  mint_wallet.debit_coin(coin)
-  CentralizedExchange.transfer( mint_wallet, bank_wallet, 1)
-  bank_wallet.check_balance
-  mint_wallet.check_balance
-  client.puts "Hello from the TCP server!"
-  client.close
-end
-=end
     end
     @client.close
   end

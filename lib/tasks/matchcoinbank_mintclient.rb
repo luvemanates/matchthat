@@ -56,6 +56,7 @@ class MintClientBank
   #maybe a central exchange should be allowed to lock coins that way nothing can happen to it
   #in the middle of transfer
   def run
+    cipher_done = false
     loop do
       response = @bank_client.gets
       puts "response is "
@@ -63,19 +64,23 @@ class MintClientBank
       params = JSON.parse(response) unless response.nil?
       data = {}
 
-      @decipher = MatchThatCipher.new
+      @decipher = MatchThatCipher.new unless cipher_done
       
-      @decipher.setup_decipher(@cipher_key, @cipher_iv)
+      @decipher.setup_decipher(@cipher_key, @cipher_iv) unless cipher_done
+
+      puts "pre-cipher response params is"
+      puts params.inspect
 
       data["wallet_identification"] = @decipher.decrypt_with_cipher(decode64(params["wallet_identification"]))
       data["coin_serial_number"] = @decipher.decrypt_with_cipher(decode64(params["coin_serial_number"]))
       data["coin_face_value"] = @decipher.decrypt_with_cipher(decode64(params["coin_face_value"]))
-      puts "data is "
+      puts "post-cipher data is "
       puts data
       puts "starting transfer"
       mint_wallet = DigitalWallet.where(:wallet_identification => data["wallet_identification"]).first
       puts mint_wallet.inspect
       CentralizedExchange.transfer(mint_wallet, @bank_wallet, data["coin_face_value"])
+      cipher_done = true
     end
     @bank_client.close
   end
