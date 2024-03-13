@@ -1,4 +1,5 @@
 require 'mongoid'
+require 'logger'
 
 class Ledger
   include Mongoid::Document
@@ -10,8 +11,18 @@ class Ledger
   field :ledger_name
   field :current_ledger_amount #should be all the debit - all the credits
 
+  attr_accessor :logger
+  #It would probably be better accounting to have a balance update in the entry
+  #field :new_balance
+  after_find :init_logger
+  before_create :init_logger
+
   def initialize(params = {:ledger_name => "Default Ledger Name", :current_ledger_amount => 0})
     super(params)
+  end
+
+  def init_logger
+    @logger = Logger.new(Logger::DEBUG)
   end
 
   def new_entry(new_ledger_block)
@@ -67,16 +78,21 @@ class LedgerEntryBlock
   field :coin_serial_number
   field :coin_face_value
 
+  attr_accessor :logger
   #It would probably be better accounting to have a balance update in the entry
   #field :new_balance
+  after_find :init_logger
+  before_create :init_logger
 
   CREDIT = "credit"
   DEBIT = "debit"
 
   def initialize(params)
+    @logger = Logger.new(Logger::DEBUG)
     @ledger_entry_type = params[:ledger_entry_type]
-    puts "inspecting params passed to ledger"
-    puts params.inspect
+    
+    @logger.debug( "inspecting params passed to ledger")
+    @logger.debug( params.inspect )
     @entry_amount = params[:coin].face_value 
     @coin_serial_number = params[:coin].serial_number
     @coin_face_value = params[:coin].face_value
@@ -86,6 +102,10 @@ class LedgerEntryBlock
     params[:coin_face_value] = params[:coin].face_value
     params.delete(:coin)
     super(params)
+  end
+
+  def init_logger
+    @logger = Logger.new(Logger::DEBUG)
   end
 end
 

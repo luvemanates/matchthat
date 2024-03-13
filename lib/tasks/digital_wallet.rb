@@ -2,6 +2,8 @@ require 'mongoid'
 require 'securerandom'
 require_relative 'ledger'
 require_relative 'mint'
+require 'logger'
+
 #how do we verify a wallet isn't just creating as many coins as it wants?
 #the bank ledger should perhaps own and issue the wallet even if someone else is using it.
 
@@ -20,6 +22,13 @@ class DigitalWallet
 
   after_create :do_crypto_card, :do_ledger
 
+  # it would be fine to have this
+  after_find :init_logger
+  before_create :init_logger
+
+  attr_accessor :logger
+
+
   def initialize(params={})
     if params[:wallet_name].nil?
       params[:wallet_name] = 'Default Wallet'
@@ -31,6 +40,11 @@ class DigitalWallet
       params[:wallet_identification] = SecureRandom.uuid
     end
     super(params)
+  end
+
+  def init_logger
+    @logger = Logger.new(Logger::DEBUG)
+    @logger.debug("initialized logger in digital wallet")
   end
 
   def do_ledger
@@ -50,9 +64,11 @@ class DigitalWallet
   def debit_coin(coin)
     ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::DEBIT, :coin => coin)
     self.ledger.ledger_entry_blocks << ledger_entry_block
-    self.coins << coin
-    puts "debit coin is "
-    puts coin.inspect
+    self.coins << coin;
+
+    @logger.debug("debit coin is ")
+    @logger.debug(coin.inspect)
+
     self.balance += coin.face_value
   end
 
@@ -61,8 +77,8 @@ class DigitalWallet
     coins = MatchMintCoin.where(:digital_wallet_id => self.id) 
     #self.coins.delete(coin)
     coin = coins.first
-    puts "coin credit is "
-    puts coin.inspect
+    @logger.debug("coin credit is ")
+    @logger.debug(coin.inspect)
     ledger_entry_block = LedgerEntryBlock.new({:ledger_entry_type => LedgerEntryBlock::CREDIT, :coin => coin})
     self.ledger.ledger_entry_blocks << ledger_entry_block
     self.balance -= coin.face_value
@@ -75,7 +91,8 @@ class DigitalWallet
   end
 
   def check_balance
-    puts "The current balance of " + self.wallet_name.to_s + " #{self.balance}."
+    @logger.debug("The current balance of " + self.wallet_name.to_s + " #{self.balance}.")
+    return self.balance
   end
 end
 

@@ -5,6 +5,7 @@ require 'json'
 require_relative 'mint'
 require_relative 'matchthat_cryptography'
 require_relative 'digital_wallet'
+require 'logger'
 
 
 
@@ -28,8 +29,10 @@ class MintServer
   attr_accessor :mint_wallet
   attr_accessor :exchange
   attr_accessor :cipher
+  attr_accessor :logger
 
   def initialize
+    @logger = Logger.new(Logger::DEBUG)
     @mint = MatchMintingBank.new 
 
     @mint_wallet = DigitalWallet.where(:wallet_name => 'Mint Wallet').first
@@ -60,14 +63,14 @@ class MintServer
       @mint_wallet.check_balance
       #CentralizedExchange.transfer( @mint_wallet, bank_wallet, 1)
       data = {"wallet_identification" => @mint_wallet.wallet_identification.to_s, "coin_serial_number" => coin.serial_number, "coin_face_value" => coin.face_value.to_s } 
-      puts "data is "
-      puts data
+      @logger.debug "data is "
+      @logger.debug(data)
       ciphered_data = {}
       ciphered_data["wallet_identification"] = encode64(@cipher.encrypt_with_cipher(data["wallet_identification"]))
       ciphered_data["coin_serial_number"] = encode64(@cipher.encrypt_with_cipher(data["coin_serial_number"]))
       ciphered_data["coin_face_value"] = encode64(  @cipher.encrypt_with_cipher(  data["coin_face_value"]  )  )
-      puts "ciphered data is "
-      puts ciphered_data
+      @logger.debug( "ciphered data is ")
+      @logger.debug( ciphered_data)
       @client.puts(ciphered_data.to_json)
     end
     @client.close
@@ -83,25 +86,20 @@ class MintServer
     @cipher.setup_cipher()
 
     random_secret = @cipher.cipher_key #(0...16).map { (65 + rand(26)).chr }.join
-    puts "random secret is " + random_secret.to_s
+    @logger.debug("random secret is " + random_secret.to_s)
 
     @client = @server.accept
     params = JSON.parse(client.gets)
     if not params["public_key"].nil?
-      puts "the public key from the client is "
-      puts params["public_key"]
+      @logger.debug("the public key from the client is ")
+      @logger.debug( params["public_key"] )
       client_public_key = decode64( params["public_key"] )
       #other_secret = matchthat_crypto.encrypt_message(mint_wallet_crypto_card, params[:public_key], "Requesting deposit authorization:", random_secret)
       encrypted_message = @crypto.encrypt_message_with_recipient_public_key(client_public_key, random_secret)
   #    decrypted_message = matchthatbank_crypto.decrypt_message_with_private_key(encrypted_message)
-      puts 'encrypted message ' 
-      puts 'encoding is ' 
-      puts encrypted_message.encoding
   #    encrypted_message = "See if this is even recieved"
       #puts encrypted_message
       encrypted_message_utf8 = encode64(encrypted_message)
-      puts "sending message with encoding " 
-      puts encrypted_message_utf8.encoding
       encrypted_cipher_iv = @crypto.encrypt_message_with_recipient_public_key(client_public_key, @cipher.cipher_iv)
       @client.puts({'encrypted_cipher' => encrypted_message_utf8, "encrypted_cipher_iv" => encode64(encrypted_cipher_iv)}.to_json)
 
@@ -113,13 +111,18 @@ class MintServer
       @client.puts({'public_key' => @crypto.public_key.to_s}.to_json)
     end
     params = JSON.parse(@client.gets)
-    puts "params parsed"
-    puts params
+    @logger.debug("params parsed")
+    @logger.debug( params)
     client_response = decode64(params["encrypted_secret"])
     decrypted_message = @crypto.decrypt_message_with_private_key(client_response)
-    puts decrypted_message
-    puts "VERIFIED" if decrypted_message == random_secret
-    return true
+    @logger.debug( "decrypted_message" )
+    @logger.debug( decrypted_message )
+    if decrypted_message == random_secret
+      @logger.debug( "VERIFIED" ) 
+      return true
+    else
+      return false
+    end
     #client.puts params[:public_key ]
     #raise params.inspect
 

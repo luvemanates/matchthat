@@ -24,6 +24,10 @@ class MatchThatCryptography
   attr_accessor :config
   attr_accessor :ss_private_key
   attr_accessor :ss_public_key
+  attr_accessor :logger
+
+  after_find :init_logger
+  before_create :init_logger
 
   def initialize(params={:card_name => 'default card'})
     keypair = OpenSSL::PKey::RSA.new(CONFIG[:key_length])
@@ -34,6 +38,11 @@ class MatchThatCryptography
     params[:public_key] = @public_key
     params[:card_name] = @card_name
     super(params)
+  end
+
+  def init_logger
+    @logger = Logger.new(Logger::DEBUG)
+    @logger.debug("initialized logger in digital wallet")
   end
 
   #need to decode and objectify database data - it would be nice to use the marshalling method
@@ -82,23 +91,23 @@ class MatchThatCryptography
     decrypted = to_party[:keypair].private_decrypt(encrypted_message)
     decrypted_secret = to_party[:keypair].private_decrypt(encrypted_secret)
 
-    puts "Signature:"
-    puts Base64.encode64(signature)
+    @logger.debug "Signature:"
+    @logger.debug Base64.encode64(signature)
 
-    puts
-    puts "Encrypted:"
-    puts Base64.encode64(encrypted_message)
+    @logger.debug '\n'
+    @logger.debug "Encrypted:"
+    @logger.debug Base64.encode64(encrypted_message)
 
-    puts
-    puts "From: #{from_party[:card_name]}"
-    puts "To  : #{to_party[:card_name]}"
+    @logger.debug '\n'
+    @logger.debug "From: #{from_party[:card_name]}"
+    @logger.debug "To  : #{to_party[:card_name]}"
 
-    puts
-    puts "Decrypted:"
-    puts decrypted
+    @logger.debug 
+    @logger.debug "Decrypted:"
+    @logger.debug decrypted
 
     if from_party[:pubkey].verify(CONFIG[:digest_func], signature, decrypted)
-            puts "Verified!"
+      @logger.debug "Verified!"
     end
     return decrypted_secret
 

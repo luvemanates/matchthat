@@ -12,8 +12,10 @@ class MatchMintingBank
   attr_accessor :total_coins
   attr_accessor :ledger
   attr_accessor :exchange
+  attr_accessor :logger
 
   def initialize
+    @logger = Logger.new(Logger::DEBUG)
     @ledger = Ledger.new(:ledger_name => 'MatchMint Ledger')
     @total_coins = 0
     @time_elapsed = 0
@@ -23,7 +25,7 @@ class MatchMintingBank
   def mint(params = {:face_value => 1, :digital_wallet => digital_wallet})
     coin = MatchMintCoin.new(:face_value => params[:face_value], :digital_wallet => params[:digital_wallet])
     while @exchange.is_already_minted_coin?(coin)
-      puts 'This coin has already been minted, so it will not be added to the exchange, or added to the ledger.'
+      @logger.warn 'This coin has already been minted, so it will not be added to the exchange, or added to the ledger.'
       coin = MatchMintCoin.new(coin_face_value)
     end
     coin.save
@@ -54,12 +56,16 @@ class MatchMintCoin #or match coin
   #attr_accessor :serial_number
   #attr_writer :created_at
   #attr_accessor :face_value
+  attr_accessor :logger
   #attr_accessor :crypto_card 
   after_create :do_crypto_card
+  after_find :init_logger
+  before_create :init_logger
 
   def initialize(params = ({face_value: 1, serial_number: SecureRandom.uuid}))
-    puts "params is "
-    puts params.inspect
+    @logger = Logger.new(Logger::DEBUG)
+    @logger.debug "match mint init params is "
+    @logger.debug params.inspect
     if params['face_value'].nil?
       params['face_value'] = 1
     end
@@ -73,6 +79,11 @@ class MatchMintCoin #or match coin
     #@crypto_card = crypto_card.save 
     #params[:crypto_card] = @crypto_card
     super(params)
+  end
+
+  def init_logger
+    @logger = Logger.new(Logger::DEBUG)
+    @logger.debug("initialized logger in MatchMintCoin")
   end
   
   def do_crypto_card

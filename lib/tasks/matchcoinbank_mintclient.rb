@@ -5,6 +5,7 @@ require 'json'
 require_relative 'matchthat_cryptography'
 require_relative 'digital_wallet'
 require_relative 'centralized_exchange'
+require 'logger'
 
 
 def encode64(string)
@@ -25,8 +26,11 @@ class MintClientBank
   attr_accessor :cipher
   attr_accessor :cipher_key
   attr_accessor :ciphera_iv
+  attr_accessor :logger
 
   def initialize
+
+    @logger = Logger.new(Logger::DEBUG)
 
     existing_bank_crypto = MatchThatCryptography.where(:Card_name => "Mint Bank Wallet Crypto Card").first
     unless existing_bank_crypto
@@ -59,8 +63,8 @@ class MintClientBank
     cipher_done = false
     loop do
       response = @bank_client.gets
-      puts "response is "
-      puts response
+      @logger.debug("response is ")
+      @logger.debug( response )
       params = JSON.parse(response) unless response.nil?
       data = {}
 
@@ -68,17 +72,17 @@ class MintClientBank
       
       @decipher.setup_decipher(@cipher_key, @cipher_iv) unless cipher_done
 
-      puts "pre-cipher response params is"
-      puts params.inspect
+      @logger.debug "pre-cipher response params is"
+      @logger.debug params.inspect
 
       data["wallet_identification"] = @decipher.decrypt_with_cipher(decode64(params["wallet_identification"]))
       data["coin_serial_number"] = @decipher.decrypt_with_cipher(decode64(params["coin_serial_number"]))
       data["coin_face_value"] = @decipher.decrypt_with_cipher(decode64(params["coin_face_value"]))
-      puts "post-cipher data is "
-      puts data
-      puts "starting transfer"
+      @logger.debug "post-cipher data is "
+      @logger.debug data
+      @logger.debug "starting transfer"
       mint_wallet = DigitalWallet.where(:wallet_identification => data["wallet_identification"]).first
-      puts mint_wallet.inspect
+      @logger.debug mint_wallet.inspect
       CentralizedExchange.transfer(mint_wallet, @bank_wallet, data["coin_face_value"])
       cipher_done = true
     end
@@ -93,10 +97,10 @@ class MintClientBank
     @bank_client.puts(request)
     response = @bank_client.gets
     params = JSON.parse(response) unless response.nil?
-    puts "params is "
-    puts params
+    @logger.debug "params is "
+    @logger.debug params
     #unless not params.nil?
-    puts 'in block'
+    @logger.debug 'in block'
     encrypted_message = params["encrypted_cipher"]
     encrypted_message = decode64(encrypted_message)
 
@@ -107,22 +111,22 @@ class MintClientBank
     decrypted_iv = @bank_crypto.decrypt_message_with_private_key(decode64(encrypted_iv))
     @cipher_iv = decrypted_iv
 
-    puts "\n\n"
-    puts "decrypted mesage IS "
-    puts decrypted_message
+    @logger.debug "\n\n"
+    @logger.debug "decrypted mesage IS "
+    @logger.debug decrypted_message
 
       #here is where we need to get the public key and encrypt it with the decrypted_message
     #end
     response = @bank_client.gets
     params = JSON.parse(response) unless response.nil?
-    puts "params is "
-    puts params
+    @logger.debug "params is "
+    @logger.debug params
     server_public_key = decode64(params["public_key"])
-    puts "server_public_key is"
-    puts server_public_key
+    @logger.debug "server_public_key is"
+    @logger.debug server_public_key
     encrypted_secret = @bank_crypto.encrypt_message_with_recipient_public_key(server_public_key, decrypted_message)
     @bank_client.puts( {"encrypted_secret" => encode64(encrypted_secret) }.to_json )
-    puts "sent encrypted secret"
+    @logger.debug "sent encrypted secret"
     return true
 
 
@@ -131,7 +135,7 @@ end
 
 mcb = MintClientBank.new
 if mcb.secure_connection
-  puts "calling run"
+  mcb.logger.debug "calling run"
   mcb.run
 end
 

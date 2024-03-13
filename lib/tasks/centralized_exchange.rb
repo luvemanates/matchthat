@@ -16,8 +16,10 @@ class CentralizedExchange
 
   attr_accessor :coins
   attr_accessor :wallets
+  attr_accessor :logger
 
   def initialize(coins=[])
+    @logger = Logger.new(Logger::DEBUG)
     @coins = coins
   end
 
@@ -39,14 +41,15 @@ class CentralizedExchange
 
   #this needs an authorization from both wallets
   def self.transfer(sender_wallet, receiver_wallet, amount=1)
+    @logger = Logger.new(Logger::DEBUG)
     #use the crypto card to ask for auth for a credit on the sender with receiver ident
     #auth = sender_wallet.request_credit_auth_from(receiver_wallet)
     # This is where the private keys for each coin need to be re-made (like changing the locks after a new owner is moved in.
     sender_wallet.check_balance
-    puts "crediting coin from wallet identification: " + sender_wallet.wallet_identification
+    @logger.debug "crediting coin from wallet identification: " + sender_wallet.wallet_identification
     tx_coin = sender_wallet.credit_coin
     sender_wallet.check_balance
-    puts "debiting coin from wallet identification: " + receiver_wallet.wallet_identification
+    @logger.debug "debiting coin from wallet identification: " + receiver_wallet.wallet_identification
     receiver_wallet.check_balance
     receiver_wallet.debit_coin(tx_coin)
     receiver_wallet.check_balance
