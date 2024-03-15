@@ -70,18 +70,21 @@ class DigitalWallet
     @logger.debug(coin.inspect)
 
     self.balance += coin.face_value
+    self.save
   end
 
   #there needs to be something better here if minting face values less or more than 1
-  def credit_coin 
-    coins = MatchMintCoin.where(:digital_wallet_id => self.id) 
+  def credit_coin(serial_number) 
+    coin = MatchMintCoin.where(:digital_wallet_id => self.id, :serial_number => serial_number).first 
     #self.coins.delete(coin)
-    coin = coins.first
     @logger.debug("coin credit is ")
     @logger.debug(coin.inspect)
     ledger_entry_block = LedgerEntryBlock.new({:ledger_entry_type => LedgerEntryBlock::CREDIT, :coin => coin})
     self.ledger.ledger_entry_blocks << ledger_entry_block
-    self.balance -= coin.face_value
+    @logger.debug "balance equation is (" + self.balance.to_s + " - " + coin.face_value.to_s + ")"
+    self.balance = self.balance.to_i - coin.face_value.to_i
+    @logger.debug "post equation is (" + self.balance.to_s + ")"
+    self.save
     return coin
   end
 
