@@ -63,8 +63,9 @@ class MintServer
       @logger.debug "coin minted, checking balance of mint wallet now"
       @mint_wallet.reload
       @mint_wallet.check_balance
-      #@mint_wallet.debit_coin(coin)
-      #@mint_wallet.check_balance
+      @mint_wallet.debit_coin(coin)
+      @mint_wallet.reload
+      @mint_wallet.check_balance
       #CentralizedExchange.transfer( @mint_wallet, bank_wallet, 1)
       data = {"wallet_identification" => @mint_wallet.wallet_identification.to_s, "coin_serial_number" => coin.serial_number, "coin_face_value" => coin.face_value.to_s } 
       @logger.debug "data is "
