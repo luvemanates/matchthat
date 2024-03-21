@@ -14,7 +14,7 @@ class MatchThatCryptography
     :digest_func => OpenSSL::Digest::SHA256.new
   }
 
-  belongs_to :crypto_card_carrier, :polymorphic => true
+  belongs_to :crypto_card_carrier, :polymorphic => true, :index => true
 
 
   field :private_key

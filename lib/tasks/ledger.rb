@@ -5,7 +5,7 @@ class Ledger
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  belongs_to :digital_wallet
+  belongs_to :digital_wallet, :index => true
   has_many :ledger_entry_blocks #object type is LedgerEntryBlock (has_many)
 
   field :ledger_name
@@ -68,7 +68,7 @@ class LedgerEntryBlock
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  belongs_to :ledger
+  belongs_to :ledger, :index => true
 
 
 #  BALANCE = "balance"

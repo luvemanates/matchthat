@@ -20,6 +20,9 @@ class DigitalWallet
   field :balance
   field :wallet_identification
 
+  index( {wallet_identification: 1}, { unique: true })
+  index({ wallet_name: 1 })
+
   after_create :do_crypto_card, :do_ledger
 
   # it would be fine to have this

@@ -48,10 +48,11 @@ class MatchMintCoin #or match coin
   include Mongoid::Timestamps
 
   field :serial_number
+  index({ serial_number: 1}, { unique: true })
   field :created_at
   field :face_value
-  has_one :crypto_card, :as => :crypto_card_carrier, :class_name => 'MatchThatCryptography' 
-  belongs_to :digital_wallet
+  has_one :crypto_card, :as => :crypto_card_carrier, :class_name => 'MatchThatCryptography'
+  belongs_to :digital_wallet, :index => true
 
   #attr_accessor :serial_number
   #attr_writer :created_at
