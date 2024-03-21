@@ -116,6 +116,9 @@ body {
 }
 #body_content h1 {
 }
+.links {
+	margin-top: 20px;
+}
 .match_content_container {
 	margin-top: 25px;
 	width: 800px;

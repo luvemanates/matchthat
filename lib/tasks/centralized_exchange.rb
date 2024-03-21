@@ -53,7 +53,14 @@ class CentralizedExchange
     @logger.debug "debiting coin from wallet identification: " + receiver_wallet.wallet_identification
     receiver_wallet.check_balance
     receiver_wallet.debit_coin(tx_coin)
+
+    encrypted_message = receiver_wallet.bind_coin_to_wallet(tx_coin)
+
+    @logger.debug "encrypted_message is "
+    @logger.debug encrypted_message
+
     receiver_wallet.reload
     receiver_wallet.check_balance
   end
+
 end

@@ -1,8 +1,13 @@
+require 'mongoid'
+require_relative '../../lib/tasks/digital_wallet'
+
 class MatchesController < ApplicationController
   before_action :set_match, only: %i[ show edit update destroy user_tally ]
 
   # GET /matches or /matches.json
   def index
+    dw = DigitalWallet.where(:wallet_name => 'Bank Wallet').first
+    puts dw.inspect
     if params[:page]
       @page = params[:page]
     else

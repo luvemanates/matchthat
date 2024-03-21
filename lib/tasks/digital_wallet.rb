@@ -11,7 +11,7 @@ class DigitalWallet
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  has_one :crypto_card, :as => :crypto_card_carrier #crypto card needs to have its own private key, and password
+  has_one :crypto_card, :as => :crypto_card_carrier, :class_name => "MatchThatCryptography" #crypto card needs to have its own private key, and password
   has_one :ledger #each wallet should have its own ledger for credits and debits
 
   has_many :coins, :class_name => 'MatchMintCoin'
@@ -48,9 +48,9 @@ class DigitalWallet
   end
 
   def do_ledger
-    ledger = Ledger.new(:ledger_name => self.wallet_name + " Ledger")
-    ledger.digital_wallet = self
-    ledger.save
+    self.ledger = Ledger.new(:ledger_name => self.wallet_name + " Ledger")
+    self.ledger.digital_wallet = self
+    self.ledger.save
   end
 
   def do_crypto_card
@@ -94,8 +94,28 @@ class DigitalWallet
   end
 
   def check_balance
+    init_logger unless @logger
     @logger.debug("The current balance of " + self.wallet_name.to_s + " #{self.balance}.")
     return self.balance
+  end
+
+  # in this method we need to use the public key of the coin to encrypt something, 
+  # and the private key to decrypt something - but this only verifies the keys work
+  # the wallet needs to create a secret with the public key, which can only be decrypted
+  # by the private key
+  # To verify that a coin is owned by a wallet the owning wallet serial number needs to match a secret
+  # created by the coin
+  # the public key of the new OWNER needs to encrypt data from the coin
+
+  #this method is trying to prevent someone simply copying an existing coin to their wallet so the same keys appear in different wallets. 
+  def bind_coin_to_wallet(coin)
+    #return coin.digital_wallet == self
+    #make new coin
+    coin.tx_keys()
+    coin_encrypted_message = coin.crypto_card.encrypt_message_with_public_key("ATTEMPTING BIND")
+    #coin.crypto_card
+    
+    return coin_encrypted_message
   end
 end
 

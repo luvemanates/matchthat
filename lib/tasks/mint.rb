@@ -50,7 +50,7 @@ class MatchMintCoin #or match coin
   field :serial_number
   field :created_at
   field :face_value
-  has_one :crypto_card, :as => :crypto_card_carrier 
+  has_one :crypto_card, :as => :crypto_card_carrier, :class_name => 'MatchThatCryptography' 
   belongs_to :digital_wallet
 
   #attr_accessor :serial_number
@@ -90,5 +90,15 @@ class MatchMintCoin #or match coin
     crypto_card = MatchThatCryptography.new(:card_name => "coin card")
     crypto_card.crypto_card_carrier = self
     @crypto_card = crypto_card.save 
+  end
+
+  def tx_keys
+    old_card = self.crypto_card
+    new_crypto_card = MatchThatCryptography.new(:card_name => "coin card")
+    new_crypto_card.crypto_card_carrier = self
+    new_crypto_card.save 
+    self.crypto_card = new_crypto_card
+    self.save
+    old_card.destroy
   end
 end
