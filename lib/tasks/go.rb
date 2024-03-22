@@ -5,15 +5,21 @@ require_relative 'mint'
 require_relative 'digital_wallet'
 
 
+mint = MatchMintingBank.new
+
 puts 'wallet is '
 mint_wallet = DigitalWallet.new(:wallet_name => "temp Mint wallet")
 mint_wallet.save
 puts mint_wallet.inspect
 
 coins = []
-coin = MatchMintCoin.new(:digital_wallet => mint_wallet)
+coin = mint.mint({:digital_wallet => mint_wallet, :face_value => "1000000"})
 #coin.load_defaults
-coin.save
+#coin.save
+puts "COIN INSPECTION FOR FACE VALUE IS" 
+puts coin.inspect
+puts "coin face_value should be 1000000"
+
 coin_before_private_key = coin.crypto_card.private_key
 coin_before_public_key = coin.crypto_card.public_key
 

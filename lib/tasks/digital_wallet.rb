@@ -72,7 +72,7 @@ class DigitalWallet
     @logger.debug("debit coin is ")
     @logger.debug(coin.inspect)
 
-    self.balance += coin.face_value
+    self.balance += coin.face_value.to_i
     self.save
   end
 

@@ -22,16 +22,18 @@ class MatchMintingBank
     @exchange = CentralizedExchange.new
   end
 
-  def mint(params = {:face_value => 1, :digital_wallet => digital_wallet})
+  def mint(params)
     coin = MatchMintCoin.new(:face_value => params[:face_value], :digital_wallet => params[:digital_wallet])
-    while @exchange.is_already_minted_coin?(coin)
-      @logger.warn 'This coin has already been minted, so it will not be added to the exchange, or added to the ledger.'
-      coin = MatchMintCoin.new(coin_face_value)
-    end
+    @logger.debug "coin.inspect for new minted coin face value check"
+    @logger.debug coin.inspect
+    #while @exchange.is_already_minted_coin?(coin)
+    #  @logger.warn 'This coin has already been minted, so it will not be added to the exchange, or added to the ledger.'
+    #  coin = MatchMintCoin.new(:face_value => coin_face_value)
+    #end
     coin.save
     @ledger = Ledger.new(:ledger_name => 'MatchMint Ledger') if @ledger.nil?
     @exchange.coins << coin 
-    @total_coins = @total_coins + params[:face_value]
+    @total_coins = @total_coins.to_i + params[:face_value].to_i
     ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::DEBIT, :coin => coin)
     ledger_entry_block.ledger = @ledger
     @ledger.new_entry(ledger_entry_block)
@@ -63,15 +65,16 @@ class MatchMintCoin #or match coin
   after_find :init_logger
   before_create :init_logger
 
-  def initialize(params = ({face_value: 1, serial_number: SecureRandom.uuid}))
+  def initialize(params)
     @logger = Logger.new(Logger::DEBUG)
     @logger.debug "match mint init params is "
     @logger.debug params.inspect
-    if params['face_value'].nil?
-      params['face_value'] = 1
+    if params[:face_value].nil?
+      #puts 'setting face_value to 1'
+      params[:face_value] = 1
     end
-    if params['serial_number'].nil?
-      params['serial_number'] = SecureRandom.uuid
+    if params[:serial_number].nil?
+      params[:serial_number] = SecureRandom.uuid
     end
     if params[:digital_wallet].nil?
       throw "No wallet found"

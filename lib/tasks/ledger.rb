@@ -35,9 +35,9 @@ class Ledger
     debits = 0
     for entry_block in self.ledger_entry_blocks
       if entry_block.ledger_entry_type == LedgerEntryBlock::CREDIT
-        credits -= entry_block.entry_amount
+        credits -= entry_block.entry_amount.to_i
       elsif entry_block.ledger_entry_type == LedgerEntryBlock::DEBIT
-        debits += entry_block.entry_amount
+        debits += entry_block.entry_amount.to_i
       end
     end
     current_ledger_amount = debits - credits

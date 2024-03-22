@@ -126,7 +126,7 @@ class MatchesController < ApplicationController
         puts dw.inspect
         mint = MatchMintingBank.new
         coin = mint.mint(:face_value => @match.total_amount, :digital_wallet => dw)
-        coin.save
+        #coin.save -- this is saved when minted
         puts "inspecting minted coin"
         puts coin.inspect
       end
