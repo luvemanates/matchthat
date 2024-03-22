@@ -1,5 +1,6 @@
 require 'mongoid'
 require_relative '../../lib/tasks/digital_wallet'
+require_relative '../../lib/tasks/mint'
 
 class MatchesController < ApplicationController
   before_action :set_match, only: %i[ show edit update destroy user_tally ]
@@ -79,6 +80,7 @@ class MatchesController < ApplicationController
     respond_to do |format|
       if @match.save
         @match.users << current_user
+        update_wallet_and_mint_coin
         format.html { redirect_to match_url(@match), notice: "Match was successfully created." }
         format.json { render :show, status: :created, location: @match }
       else
@@ -112,6 +114,24 @@ class MatchesController < ApplicationController
   end
 
   private
+    def update_wallet_and_mint_coin
+      puts "in create update_wallet_and_mint_coin"
+      if current_user
+        dw = DigitalWallet.where(:wallet_name => current_user.email + " wallet").first
+        unless dw
+          dw = DigitalWallet.new(:wallet_name => current_user.email + " wallet")
+          dw.save
+        end
+        puts "inspecting digital wallet"
+        puts dw.inspect
+        mint = MatchMintingBank.new
+        coin = mint.mint(:face_value => @match.total_amount, :digital_wallet => dw)
+        coin.save
+        puts "inspecting minted coin"
+        puts coin.inspect
+      end
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_match
       @match = Match.find(params[:id])

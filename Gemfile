@@ -69,4 +69,5 @@ end
 gem 'mongoid'
 gem "mysql2"
 gem "devise"
+gem "omniauth"
 gem "will_paginate"

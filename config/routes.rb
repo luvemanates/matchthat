@@ -1,5 +1,13 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: {
+    sessions: 'devise/sessions',
+    confirmations: 'devise/confirmations',
+    registrations: 'devise/registrations',
+    unlocks: 'devise/unlocks',
+    passwords: 'devise/passwords',
+    omniauth_callbacks: 'devise/omniauth_callbacks'
+  }
+
   resources :matches do
     collection do 
       get 'popular' #, :controller => :matches, :action => 'popular'
