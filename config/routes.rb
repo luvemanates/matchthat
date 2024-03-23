@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :matches do
     collection do 
       get 'popular' #, :controller => :matches, :action => 'popular'
+      get 'feed'
     end
     member do
       post 'matchthat'

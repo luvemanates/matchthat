@@ -1,9 +1,19 @@
 require 'mongoid'
 require_relative '../../lib/tasks/digital_wallet'
 require_relative '../../lib/tasks/mint'
+require_relative '../../lib/tasks/ledger'
 
 class MatchesController < ApplicationController
   before_action :set_match, only: %i[ show edit update destroy user_tally ]
+
+  def feed
+    @ledger = Ledger.where(:ledger_name => 'Bank Wallet Ledger').first
+    @ledger_entry_blocks = @ledger.ledger_entry_blocks.limit(10)
+    respond_to do |format|
+      format.rss  { render :layout => false }
+      format.xml { render 'feed', :layout => false}
+    end
+  end
 
   # GET /matches or /matches.json
   def index
