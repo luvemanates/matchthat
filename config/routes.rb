@@ -1,11 +1,11 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: {
-    sessions: 'devise/sessions',
-    confirmations: 'devise/confirmations',
-    registrations: 'devise/registrations',
-    unlocks: 'devise/unlocks',
-    passwords: 'devise/passwords',
-    omniauth_callbacks: 'devise/omniauth_callbacks'
+    sessions: 'users/sessions',
+    confirmations: 'users/confirmations',
+    registrations: 'users/registrations',
+    unlocks: 'users/unlocks',
+    passwords: 'users/passwords',
+    omniauth_callbacks: 'users/omniauth_callbacks'
   }
 
   resources :matches do
