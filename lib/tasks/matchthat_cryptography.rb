@@ -17,8 +17,8 @@ class MatchThatCryptography
   belongs_to :crypto_card_carrier, :polymorphic => true, :index => true
 
 
-  field :private_key
-  field :public_key
+  field :private_key #this is a base64.encode64 key stored in mongo
+  field :public_key  #this is also a base64.encode64 stored in mongo
   field :card_name
 
   attr_accessor :config
