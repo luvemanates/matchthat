@@ -115,10 +115,22 @@ class DigitalWallet
     #return coin.digital_wallet == self
     #make new coin
     coin.tx_keys()
-    coin_encrypted_message = coin.crypto_card.encrypt_message_with_public_key("ATTEMPTING BIND")
+    auth_number = SecureRandom.uuid
+    message_to_encrypt = "ATTEMPTING BIND: " + auth_number 
+    coin_encrypted_message = Base64.encode64(coin.crypto_card.encrypt_message_with_public_key(message_to_encrypt))
+    coin_decrypted_message = coin.crypto_card.decrypt_message_with_private_key(Base64.decode64(coin_encrypted_message))
+
+    @logger.debug "Wallet details for bind_coin_to_wallet  " + self.inspect
+    wallet_encrypted_message = Base64.encode64(self.crypto_card.encrypt_message_with_public_key(coin_decrypted_message))
+    wallet_decrypted_message = self.crypto_card.decrypt_message_with_private_key(Base64.decode64(wallet_encrypted_message))
+
+    throw "Coin keys are broken" unless message_to_encrypt == coin_decrypted_message
+    throw "Wallet keys are broken" unless coin_decrypted_message == wallet_decrypted_message
+    @logger.debug "Coin decrypted message is: " + coin_decrypted_message
+    @logger.debug "Wallet decrypted message is: " + wallet_decrypted_message
     #coin.crypto_card
     
-    return coin_encrypted_message
+    return "AUTHORIZED"
   end
 end
 

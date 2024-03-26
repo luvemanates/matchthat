@@ -66,11 +66,14 @@ class MatchThatCryptography
     recipient_public_key  = OpenSSL::PKey::RSA.new(recipient_public_key)
     encrypted_message = recipient_public_key.public_encrypt(message)
     #encrypted_secret = to_party[:pubkey].public_encrypt(secret)
+    return encrypted_message
   end
 
   def encrypt_message_with_public_key(message)
     if @public_key.is_a?(String)
       @public_key = OpenSSL::PKey::RSA.new( Base64.decode64( @public_key) )
+    elsif self.public_key.is_a?(String)
+      @public_key = OpenSSL::PKey::RSA.new( Base64.decode64( self.public_key) )
     end
     encrypted_message = @public_key.public_encrypt(message)
     return encrypted_message
@@ -80,6 +83,8 @@ class MatchThatCryptography
   def decrypt_message_with_private_key(encrypted_message)
     if @private_key.is_a?(String)
       @private_key = OpenSSL::PKey::RSA.new( Base64.decode64( @private_key) )
+    elsif self.private_key.is_a?(String)
+      @private_key = OpenSSL::PKey::RSA.new( Base64.decode64( self.private_key) )
     end
     decrypted_message = @private_key.private_decrypt(encrypted_message)
     return decrypted_message
