@@ -74,15 +74,18 @@ class LedgerEntryBlock
 #  BALANCE = "balance"
 
   field :entry_amount
+  field :balance
   field :ledger_entry_type #credit or debit
   field :coin_serial_number
   field :coin_face_value
+
 
   attr_accessor :logger
   #It would probably be better accounting to have a balance update in the entry
   #field :new_balance
   after_find :init_logger
   before_create :init_logger
+  before_create :update_balance
 
   CREDIT = "credit"
   DEBIT = "debit"
@@ -104,6 +107,16 @@ class LedgerEntryBlock
     super(params)
   end
 
+  def update_balance
+    previous_block = self.ledger.ledger_entry_blocks.order(:created_at => :desc).first
+    #self.current_hash = 
+    self.balance = previous_block.balance
+    if self.balance == nil 
+      self.balance = 0
+    end
+    self.balance = self.balance.to_i + self.coin_face_value.to_i if self.ledger_entry_type == DEBIT
+    self.balance = self.balance.to_i - self.coin_face_value.to_i if self.ledger_entry_type == CREDIT
+  end
   def init_logger
     @logger = Logger.new(Logger::DEBUG)
   end

@@ -6,6 +6,8 @@ require_relative 'matchthat_cryptography'
 
 #I think this class should have a digital wallet
 
+#One of these classes need a way to make change and mint smaller coins
+
 class MatchMintingBank
 
   attr_accessor :time_elapsed

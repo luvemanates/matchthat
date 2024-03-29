@@ -20,6 +20,8 @@ class DigitalWallet
   field :balance
   field :wallet_identification
 
+  #should add a field to consider whether a wallet is "open" or not
+
   index( {wallet_identification: 1}, { unique: true })
   index({ wallet_name: 1 })
 
