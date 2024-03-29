@@ -1,3 +1,4 @@
+require 'digest'
 require 'mongoid'
 require 'logger'
 
@@ -78,14 +79,15 @@ class LedgerEntryBlock
   field :ledger_entry_type #credit or debit
   field :coin_serial_number
   field :coin_face_value
-
+  field :current_hash
+  field :previous_hash
 
   attr_accessor :logger
   #It would probably be better accounting to have a balance update in the entry
   #field :new_balance
   after_find :init_logger
   before_create :init_logger
-  before_create :update_balance
+  before_create :update_balance, :calculate_hash
 
   CREDIT = "credit"
   DEBIT = "debit"
@@ -109,7 +111,6 @@ class LedgerEntryBlock
 
   def update_balance
     previous_block = self.ledger.ledger_entry_blocks.order(:created_at => :desc).first
-    #self.current_hash = 
     self.balance = previous_block.balance
     if self.balance == nil 
       self.balance = 0
@@ -117,6 +118,17 @@ class LedgerEntryBlock
     self.balance = self.balance.to_i + self.coin_face_value.to_i if self.ledger_entry_type == DEBIT
     self.balance = self.balance.to_i - self.coin_face_value.to_i if self.ledger_entry_type == CREDIT
   end
+
+  def calculate_hash
+    previous_block = self.ledger.ledger_entry_blocks.order(:created_at => :desc).first
+    if previous_block.nil?
+      self.previous_hash = "Genesis Block" 
+    else
+      self.previous_hash = previous_block.current_hash
+    end
+    self.current_hash = Digest::SHA256.hexdigest("#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.ledger_entry_type}#{previous_hash}")
+  end
+
   def init_logger
     @logger = Logger.new(Logger::DEBUG)
   end
