@@ -40,6 +40,29 @@ class CentralizedExchange
   end
 
   #this needs an authorization from both wallets
+  def self.make_change(wallet, amount = 1)
+    mint_wallet = DigitalWallet.where(:wallet_name => 'Mint Wallet').first
+    balance = wallet.check_balance
+    if balance < amount
+      @logger.debug "Insufficient Funds"
+      return 0
+    end
+    top_amount = amount.ceil
+    credit_amount = 0
+    for coin in wallet.coins
+      credited_coin = wallet.credit_coin(coin.serial_number)
+      credit_amount = credit_amount + coin.face_value
+      mint_wallet.debit_coin(credited_coin)
+      break if credit_amount >= top_amount
+    end
+    @mint = MatchMintingBank.new
+    # send back the exact amount in the form of the key
+    @mint.mint(:face_value => amount, :digital_wallet => wallet)
+    # send back the leftover in another key
+    @mint.mint(:face_value => top_amount - amount, :digital_wallet => wallet)
+  end
+
+  #this needs an authorization from both wallets
   def self.transfer(sender_wallet, receiver_wallet, serial_number, amount=1)
     @logger = Logger.new(Logger::DEBUG)
     #use the crypto card to ask for auth for a credit on the sender with receiver ident

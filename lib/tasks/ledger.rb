@@ -126,7 +126,7 @@ class LedgerEntryBlock
     else
       self.previous_hash = previous_block.current_hash
     end
-    self.current_hash = Digest::SHA256.hexdigest("#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.ledger_entry_type}#{previous_hash}")
+    self.current_hash = Digest::SHA256.hexdigest("#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.balance}#{self.ledger_entry_type}#{previous_hash}")
   end
 
   def init_logger
