@@ -1,0 +1,114 @@
+require 'mongoid'
+
+class MerkleTree
+
+  include Mongoid::Document
+  include Mongoid::Timestamps
+
+  has_many :merkle_tree_nodes
+
+  attr_accessor :tree
+  attr_accessor :root_node
+
+  def initialize(params={})
+    super(params)
+  end
+
+  def balance_tree(subtree = nil)
+    for node in self.merkle_tree_nodes
+      if node.node_type == 'leaf'
+        balance_tree(node.parent)
+      elsif node.node_type == 'node'
+        nodes_children = node.children
+        if nodes_children.size == 2
+          node.merkle_hash = Digest::SHA256.digest( nodes.children.first.merkle_hash + nodes.chilren.last.merkle_hash)
+          balance_tree(node.parent)
+        elsif nodes_children.size == 1 #hash the same data twice until children size becomes 2
+          node.merkle_hash = Digest::SHA256.digest( nodes.children.first.merkle_hash + nodes.chilren.first.merkle_hash)
+          balance_tree(node.parent)
+        end
+      elsif node.node_type == 'root'
+        nodes_children = node.children
+        if nodes_children.size == 2
+          node.merkle_hash = Digest::SHA256.digest( nodes.children.first.merkle_hash + nodes.chilren.last.merkle_hash)
+        elsif nodes_children.size == 1
+          node.merkle_hash = Digest::SHA256.digest( nodes.children.first.merkle_hash + nodes.chilren.first.merkle_hash)
+        else
+        end
+      end
+    end
+  end
+
+  def get_leaf_height
+    leaf = MerkleTreeNode.where(:node_type => 'leaf').first
+    parent = leaf.parent
+    leaf_height = 1
+    while not parent.nil?
+      leaf_height = leaf_height + 1
+      parent = parent.parent
+    end
+    return leaf_height
+  end
+
+  def add_leaf(params)
+    #recently_added_leaves = MerkleTreeNode.where(:node_type => 'leaf').order(:created_at => :desc).limit(2) 
+    new_leaf = MerkleTreeNode.new(:node_type => 'leaf', :stored_data => params[:data])
+    self.merkle_tree_nodes << new_leaf.save
+  end
+
+  def add_node(params)
+    new_node = MerkleTreeNode.new(:node_type => params[:node_type], :stored_data => params[:stored_data])
+    return new_node
+    #new_node.children
+    #check if the number of nodes is even, if not, add a node to the bottom
+    #if this node makes the number even, add it, and recursively build hashes.
+    #if a node needs to be hashed then we can add it to a hash queue
+    #recently_added_leaves = MerkleTreeNode.where(:node_type => 'leaf').order(:created_at => :desc).limit(2) 
+    #if the last added leaves are on the same node don't do anything
+    #if the last added leafe is on a s
+  end
+
+
+end
+
+class MerkleTreeNode
+
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  #belongs_to :merkle_tree
+  #belongs_to :merkle_tree_node
+
+  belongs_to :parent, optional: true, :class_name => 'MerkleTreeNode', :foreign_key => 'parent_id'
+  has_many :children, :class_name => 'MerkleTreeNode', :primary_key => 'parent_id'
+
+  field :node_type
+  field :stored_data
+  field :merkle_hash
+
+  def initialize(params)
+=begin
+    if params[:node_type] == 'leaf'
+      do_new_leaf
+    else
+      do_new_node
+    end
+=end
+    super(params)
+  end
+
+  def do_new_leaf
+    recently_added_leaves = MerkleTreeNode.where(:node_type => 'leaf').order(:created_at => :desc).limit(2) 
+    if not recently_added_leaves.empty?
+      if recently_added_leaves.last.parent == recently_added_leaves.first.parent
+        # need to add a regular node
+        #self.parent = 
+      else
+          self.parent = recently_added_leaves.first.parent
+          self.merkle_hash = Digest::SHA256.digest(self.stored_data)
+      end
+    end
+  end
+
+  def do_new_node
+  end
+end
