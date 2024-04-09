@@ -96,7 +96,8 @@ class MerkleTreeNode
   #belongs_to :merkle_tree_node
 
   belongs_to :parent, optional: true, :class_name => 'MerkleTreeNode', :foreign_key => 'parent_id', :index => true
-  has_many :children, :class_name => 'MerkleTreeNode', :primary_key => 'parent_id', :foreign_key => 'parent_id'
+  #has_many :children, :class_name => 'MerkleTreeNode', :primary_key => 'id', :foreign_key => 'parent_id'
+
 
   field :node_type
   field :stored_data
@@ -111,6 +112,10 @@ class MerkleTreeNode
     end
 =end
     super(params)
+  end
+
+  def children
+    MerkleTreeNode.all.where(:parent_id => self.id)
   end
 
   def do_new_leaf
