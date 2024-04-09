@@ -14,6 +14,18 @@ class MerkleTree
     super(params)
   end
 
+  def traverse_tree(subtree = nil)
+    return if subtree.nil?
+    #visit current_node
+    puts "current node is " + subtree.inspect
+    nsubtree_left  = subtree.children.first
+    puts "nsubtree_left" + subtree.children.first.inspect
+    nsubtree_right = subtree.children.last
+    puts "nsubtree_right" + subtree.children.last.inspect
+    traverse_tree( nsubtree_left )
+    traverse_tree( nsubtree_right )
+  end
+
   def balance_tree(subtree = nil)
     for node in self.merkle_tree_nodes
       if node.node_type == 'leaf'
@@ -56,8 +68,13 @@ class MerkleTree
     self.merkle_tree_nodes << new_leaf.save
   end
 
+
+  #find recent leaves -- if parent is available then add
+  #this is the easiest case
+  #for the other case we need to add parent nodes -- sometimes replacing the root
+  #add parent nodes until leaf height is reached
   def add_node(params)
-    new_node = MerkleTreeNode.new(:node_type => params[:node_type], :stored_data => params[:stored_data])
+    new_node = MerkleTreeNode.new(:node_type => params[:node_type], :stored_data => params[:stored_data], :merkle_tree => self)
     return new_node
     #new_node.children
     #check if the number of nodes is even, if not, add a node to the bottom
@@ -75,17 +92,17 @@ class MerkleTreeNode
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  #belongs_to :merkle_tree
+  belongs_to :merkle_tree
   #belongs_to :merkle_tree_node
 
-  belongs_to :parent, optional: true, :class_name => 'MerkleTreeNode', :foreign_key => 'parent_id'
-  has_many :children, :class_name => 'MerkleTreeNode', :primary_key => 'parent_id'
+  belongs_to :parent, optional: true, :class_name => 'MerkleTreeNode', :foreign_key => 'parent_id', :index => true
+  has_many :children, :class_name => 'MerkleTreeNode', :primary_key => 'parent_id', :foreign_key => 'parent_id'
 
   field :node_type
   field :stored_data
   field :merkle_hash
 
-  def initialize(params)
+  def initialize(params={})
 =begin
     if params[:node_type] == 'leaf'
       do_new_leaf
