@@ -15,13 +15,14 @@ class MerkleTree
   end
 
   def traverse_tree(subtree = nil)
+    #puts "visiting " + subtree.inspect
     return if subtree.nil?
     #visit current_node
-    puts "current node is " + subtree.inspect
+    #puts "current node is " + subtree.inspect
     nsubtree_left  = subtree.children.first
-    puts "nsubtree_left" + subtree.children.first.inspect
+    #puts "nsubtree_left" + subtree.children.first.inspect
     nsubtree_right = subtree.children.last
-    puts "nsubtree_right" + subtree.children.last.inspect
+    #puts "nsubtree_right" + subtree.children.last.inspect
     traverse_tree( nsubtree_left )
     traverse_tree( nsubtree_right )
   end

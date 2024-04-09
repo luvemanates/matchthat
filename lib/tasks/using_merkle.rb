@@ -46,5 +46,5 @@ puts leaf_node_two2.inspect
 puts "Leaf height is " + mt.get_leaf_height.to_s
 
 puts "HEIGHT 3 " if leaf_node_one2.parent.parent == root_node
-#puts "TRAVERSING FULL TREE"
-#mt.traverse_tree( parent_node2 )
+puts "TRAVERSING FULL TREE"
+mt.traverse_tree( root_node )
