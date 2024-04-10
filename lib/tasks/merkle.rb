@@ -168,7 +168,7 @@ class MerkleTreeNode
   def do_new_node
   end
   
-  def sibling(node = nil)
+  def sibling(node = self)
     return if node.nil?
     common_parent = node.parent
     return if common_parent.nil?
