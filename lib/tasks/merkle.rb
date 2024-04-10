@@ -65,9 +65,37 @@ class MerkleTree
 
   def add_leaf(params)
     #recently_added_leaves = MerkleTreeNode.where(:node_type => 'leaf').order(:created_at => :desc).limit(2) 
-    new_leaf = MerkleTreeNode.new(:node_type => 'leaf', :stored_data => params[:data])
-    self.merkle_tree_nodes << new_leaf.save
+    new_leaf = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::LEAF, :stored_data => params[:data])
+    new_leaf.merkle_hash = Digest::SHA256.digest(self.stored_data)
+    new_leaf.fufilled = true
+
+    #new_leaf.parent = nil
+    new_leaf.save
   end
+
+  def available_parent(new_node)
+    recently_added_leaf = MerkleTreeNode.where(:node_type => MerkleTreeNode::LEAF).order(:created_at => :desc).limit(1) 
+    if recently_added_leaf.nil?
+      #make root
+      new_root = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::ROOT )
+      new_root.save
+      new_node.parent = new_root
+      new_node.save
+      return new_root
+    else #there is a recent leaf that we have
+      if recently_added_leaf.parent.children.size == 1
+        new_node.parent = recently_added_leaf.parent
+        new_node.save
+        return recently_addeed_leaf.parent
+      else #recently_added_leaf children is size 2 #last leafs inserted has full parents #need to take care of special cases
+        #leaf needs to make  parents based on currentleafheight
+        leaf_height = get_leaf_height
+        #need to check what is fufilled
+        #need to break down cases
+      end
+    end
+  end
+
 
 
   #find recent leaves -- if parent is available then add
@@ -103,6 +131,11 @@ class MerkleTreeNode
   field :node_type
   field :stored_data
   field :merkle_hash
+  field :fufilled
+
+  LEAF = "LEAF"  #MerkleTreeNode::LEAF 
+  PARENT = "PARENT" #MerkleTreeNode::PARENT
+  ROOT = "ROOT" #MerkleTreeNode::ROOT
 
   def initialize(params={})
 =begin
@@ -133,5 +166,18 @@ class MerkleTreeNode
   end
 
   def do_new_node
+  end
+  
+  def sibling(node = nil)
+    return if node.nil?
+    common_parent = node.parent
+    return if common_parent.nil?
+    parent_children = common_parent.children
+    return if parent_children.nil?
+    for n in parent_children
+      if n.id != node.id
+        return n
+      end
+    end
   end
 end
