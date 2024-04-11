@@ -1,4 +1,6 @@
 require 'mongoid'
+require 'digest'
+require 'base64'
 
 class MerkleTree
 
@@ -15,7 +17,7 @@ class MerkleTree
   end
 
   def traverse_tree(subtree = nil)
-    #puts "visiting " + subtree.inspect
+    puts "visiting " + subtree.inspect
     return if subtree.nil?
     #visit current_node
     #puts "current node is " + subtree.inspect
@@ -66,30 +68,41 @@ class MerkleTree
   def add_leaf(params)
     #recently_added_leaves = MerkleTreeNode.where(:node_type => 'leaf').order(:created_at => :desc).limit(2) 
     new_leaf = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::LEAF, :stored_data => params[:data])
-    new_leaf.merkle_hash = Digest::SHA256.digest(self.stored_data)
-    new_leaf.fufilled = true
+    new_leaf.stored_data = params[:stored_data] #there is a bug somehwere because i shouldnt need to do this
+    #new_leaf.merkle_hash = Digest::SHA256.digest(new_leaf[:stored_data])
+    #new_leaf.fulfilled = true
 
     #new_leaf.parent = nil
+    available_parent = available_parent(new_leaf)
     new_leaf.save
   end
 
   def available_parent(new_node)
-    recently_added_leaf = MerkleTreeNode.where(:node_type => MerkleTreeNode::LEAF).order(:created_at => :desc).limit(1).first
+    recently_added_leaf = MerkleTreeNode.where(:merkle_tree => self, :node_type => MerkleTreeNode::LEAF).order(:created_at => :desc).limit(1).first
     if recently_added_leaf.nil?
       #make root
       new_root = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::ROOT )
       new_root.save
       new_node.parent = new_root
       new_node.save
+      new_root.save
       return new_root
     else #there is a recent leaf that we have
-      if recently_added_leaf.parent.children.size == 1
-        new_node.parent = recently_added_leaf.parent
-        new_node.save
-        return recently_addeed_leaf.parent
-      else #recently_added_leaf children is size 2 #last leafs inserted has full parents #need to take care of special cases
-        #leaf needs to make  parents based on currentleafheight
-        #if root is fufilled we need to make a new root
+      ral_parent = recently_added_leaf.parent #this shouldn't be nil
+      can_add_parent = false
+      can_add_parent = (not ral_parent.nil?) 
+      can_add_parent_oth = (not ral_parent.children.nil?) if can_add_parent
+      if can_add_parent and can_add_parent_oth 
+        if recently_added_leaf.parent.children.size == 1
+          new_node.parent = recently_added_leaf.parent
+          new_node.save
+          return recently_added_leaf.parent
+        else #recently_added_leaf children is size 2 #last leafs inserted has full parents #need to take care of special cases
+          #leaf needs to make  parents based on currentleafheight
+          #if root is fulfilled we need to make a new root
+          avail_parent_sub(new_node)
+        end
+      else
         avail_parent_sub(new_node)
       end
     end
@@ -97,18 +110,21 @@ class MerkleTree
 
   def avail_parent_sub(new_node)
     current_root = MerkleTreeNode.where(:merkle_tree => self, :node_type => MerkleTreeNode::ROOT).first
-    if current_root.fufilled #thinking we should recursively use this code to iterate until an unfufilled parent
+    if current_root.fulfilled #thinking we should recursively use this code to iterate until an unfulfilled parent
       #make new root
       current_root.node_type = MerkleTreeNode::PARENT
       new_root = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::ROOT )
       new_root.save
       current_root.parent = new_root
       current_root.save
+      new_root.save #saving twice to compute merkle root with children available
 
       new_parent = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::PARENT )
       new_parent.save
       new_node.parent = new_parent
       new_node.save
+      new_parent.save #saving twice to compute merkle root with children available
+
       previous_parent = new_parent
       leaf_height = get_leaf_height
       i = 2
@@ -120,27 +136,42 @@ class MerkleTree
         previous_parent = new_parent
         i = i + 1
       end
-    else #current_root.fufilled == false
-      avail_parent_sub_rec(current_root)
+    else #current_root.fulfilled == false
+      avail_parent_sub_rec(current_root, 1, new_node) #, new_node?
     end
+    return new_node.parent
   end
 
-  def avail_parent_sub_rec(subtree = nil)
+  #maybe traverse the tree following unfulfilled nodes, 
+  def avail_parent_sub_rec(subtree = nil, current_height = 0, new_node = nil)
     return if subtree == nil
-    current_parent = current_root
+    current_parent = subtree
     leaf_height = get_leaf_height
-    i = 1
-    while i < leaf_height
-      current_parent_children = current_parent.children
-      current_child_left = current_parent_children.last unless current_parent_children.nil?
-      current_child_right = current_parent_children.first unless current_parent_children.nil?
-      if not current_child_left.fufilled
-        #new_parent = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::PARENT )
-        #current_child_left.parent = 
+
+    parent_children = current_parent.children
+    if parent_children.size == 1
+      new_parent = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::PARENT )
+      new_parent.parent = current_parent
+      new_parent.save
+      avail_parent_sub_rec(new_parent)
+    elsif parent_children.size == 0
+      if current_height < leaf_height
+        new_parent = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::PARENT )
+        new_parent.parent = current_parent
+        new_parent.save
+        current_parent.save #save to computer merkle for new child
+      else
+        new_node.parent = current_parent
+        new_node.save
+        current_parent.save #save to cacl merkle for new child
       end
-      if not current_child_right.fufilled
+    else #size == 2
+      if not parent_children.first.fulfilled
+        avail_parent_sub_rec(parent_children.first, current_height, new_node)
       end
-      i = i + 1
+      if not parent_children.last.fulfilled
+        avail_parent_sub_rec(parent_children.last, current_height, new_node)
+      end
     end
   end
 
@@ -177,9 +208,9 @@ class MerkleTreeNode
   field :node_type
   field :stored_data
   field :merkle_hash
-  field :fufilled
+  field :fulfilled
 
-  before_create :do_digest_fufillment
+  before_save :do_digest_fulfillment
 
   LEAF = "LEAF"  #MerkleTreeNode::LEAF 
   PARENT = "PARENT" #MerkleTreeNode::PARENT
@@ -189,20 +220,27 @@ class MerkleTreeNode
     super(params)
   end
 
-  def do_digest_fufillment
+  def do_digest_fulfillment
+    return if self.fulfilled
     case self.node_type
     when MerkleTreeNode::LEAF
-      self.merkle_hash = Digest::SHA256.digest(:stored_data)
-      self.fufilled = true
+      puts "printing in digest fulfillment"
+      puts self.inspect
+      self.merkle_hash = Base64.encode64(Digest::SHA256.digest(self.stored_data))
+      self.fulfilled = true
     when MerkleTreeNode::PARENT, MerkleTreeNode::ROOT
       children = self.children
       if children.size == 2
-        hash = ""
-        self.merkle_hash = Digest::SHA256.digest(children.first.stored_data + " " + children.last.stored_data)
-        self.fufilled = true
+        dec_fc = Base64.decode64(children.last.merkle_hash) 
+        dec_sc = Base64.decode64(children.first.merkle_hash)
+        self.merkle_hash = Base64.encode64(Digest::SHA256.digest(dec_fc + " " + dec_sc))
+        self.fulfilled = true
       elsif children.size == 1
-        self.merkle_hash = Digest::SHA256.digest(children.first.stored_data + " " + children.first.stored_data)
-        self.fulfilled = false
+        unless children.first.merkle_hash.nil?
+          dec_fc = Base64.decode64(children.first.merkle_hash) 
+          self.merkle_hash = Base64.encode64(Digest::SHA256.digest(dec_fc + " " + dec_fc))
+          self.fulfilled = false
+        end
       else #parent of no one do nothing
       end
     end
@@ -214,22 +252,6 @@ class MerkleTreeNode
     MerkleTreeNode.all.where(:parent_id => self.id).order(:created_at => :desc)
   end
 
-  def do_new_leaf
-    recently_added_leaves = MerkleTreeNode.where(:node_type => 'leaf').order(:created_at => :desc).limit(2) 
-    if not recently_added_leaves.empty?
-      if recently_added_leaves.last.parent == recently_added_leaves.first.parent
-        # need to add a regular node
-        #self.parent = 
-      else
-          self.parent = recently_added_leaves.first.parent
-          self.merkle_hash = Digest::SHA256.digest(self.stored_data)
-      end
-    end
-  end
-
-  def do_new_node
-  end
-  
   def sibling(node = self)
     return if node.nil?
     common_parent = node.parent
