@@ -120,10 +120,8 @@ class MerkleTree
       new_root.save #saving twice to compute merkle root with children available
 
       new_parent = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::PARENT )
+      new_parent.parent = new_root
       new_parent.save
-      new_node.parent = new_parent
-      new_node.save
-      new_parent.save #saving twice to compute merkle root with children available
 
       previous_parent = new_parent
       leaf_height = get_leaf_height
