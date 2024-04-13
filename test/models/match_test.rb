@@ -22,6 +22,13 @@ class MatchTest < ActiveSupport::TestCase
 
     mt.add_leaf({:stored_data => 'leaf 5'})
     mt.add_leaf({:stored_data => 'leaf 6'})
+    assert MerkleTreeNode.where(:stored_data => 'leaf 3').first.parent.node_type == "PARENT"
+
+    mt.add_leaf({:stored_data => 'leaf 5'})
+    mt.add_leaf({:stored_data => 'leaf 6'})
+    assert MerkleTreeNode.where(:stored_data => 'leaf 5').first.parent.node_type == "PARENT"
+    assert MerkleTreeNode.where(:stored_data => 'leaf 5').first.parent.parent.node_type == "PARENT"
+    assert MerkleTreeNode.where(:stored_data => 'leaf 5').first.parent.parent.parent.node_type == "ROOT"
   end
 
   test "can create a match with a user" do
