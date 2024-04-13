@@ -123,6 +123,7 @@ class MerkleTree
     return new_node.parent
   end
 
+  #this may need to be changed to start at the root and create parents otherwise we have traverse the tree and add merkle hash's after the leaf is added
   #maybe traverse the tree following unfulfilled nodes, 
   def avail_parent_sub_rec(subtree = nil, current_height = 1, new_node = nil)
     return if subtree == nil
@@ -211,6 +212,7 @@ class MerkleTreeNode
             dec_fc = Base64.decode64(children.first.merkle_hash) 
             self.merkle_hash = Base64.encode64(Digest::SHA256.digest(dec_fc + " " + dec_fc))
             self.fulfilled = false
+            puts "just sent fulfilled is false for " + self.inspect
           end
         else #parent of no one do nothing
       end
