@@ -15,13 +15,10 @@ class MerkleTree
   def traverse_tree(subtree = nil)
     return if subtree.nil?
     #visit current_node
-    #puts "current node is " + subtree.inspect
-    puts "visiting " + subtree.inspect
     return if subtree.children.nil?
+    puts subtree.inspect
     nsubtree_left  = subtree.children.first
-    #puts "nsubtree_left" + subtree.children.first.inspect
     nsubtree_right = subtree.children.last
-    #puts "nsubtree_right" + subtree.children.last.inspect
     traverse_tree( nsubtree_left )
     traverse_tree( nsubtree_right )
   end
@@ -84,7 +81,6 @@ class MerkleTree
     current_root = MerkleTreeNode.where(:merkle_tree => self, :node_type => MerkleTreeNode::ROOT).first
     current_root.save if current_root.children.size == 2
     if current_root.fulfilled #thinking we should recursively use this code to iterate until an unfulfilled parent
-      puts "in current_root fulfilled"
       #make new root
       current_root.node_type = MerkleTreeNode::PARENT
       new_root = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::ROOT )
@@ -186,14 +182,11 @@ class MerkleTreeNode
 
   def do_digest_fulfillment
     return if self.fulfilled
-    puts "doing fulfillment for " + self.inspect 
     case self.node_type
       when MerkleTreeNode::LEAF
-        puts "in case LEAF"
         self.merkle_hash = Base64.encode64(Digest::SHA256.digest(self.stored_data))
         self.fulfilled = true
       when MerkleTreeNode::PARENT, MerkleTreeNode::ROOT
-        puts "in case PARENT, ROOT"
         children = self.children
         if children.size == 2
           dec_fc = Base64.decode64(children.last.merkle_hash) 
@@ -202,13 +195,11 @@ class MerkleTreeNode
           self[:fulfilled] = true
           @fulfilled = true
           self.fulfilled = true
-          puts "just sent fulfilled for " + self.inspect
         elsif children.size == 1
           unless children.first.merkle_hash.nil?
             dec_fc = Base64.decode64(children.first.merkle_hash) 
             self.merkle_hash = Base64.encode64(Digest::SHA256.digest(dec_fc + " " + dec_fc))
             self.fulfilled = false
-            puts "just sent fulfilled is false for " + self.inspect
           end
         else #parent of no one do nothing
       end
