@@ -12,10 +12,6 @@ class MerkleTree
   attr_accessor :tree
   attr_accessor :root_node
 
-  def initialize(params={})
-    super(params)
-  end
-
   def traverse_tree(subtree = nil)
     return if subtree.nil?
     #visit current_node
