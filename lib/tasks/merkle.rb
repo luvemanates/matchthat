@@ -8,9 +8,9 @@ class MerkleTree
   include Mongoid::Timestamps
 
   has_many :merkle_tree_nodes
+  belongs_to :ledger, optional: true, :index => true
 
-  attr_accessor :tree
-  attr_accessor :root_node
+  field :root_node_id
 
   def traverse_tree(subtree = nil)
     return if subtree.nil?
@@ -55,6 +55,8 @@ class MerkleTree
       #make root
       new_root = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::ROOT )
       new_root.save
+      self.root_node_id = new_root.id
+      self.save
       new_node.parent = new_root
       new_node.save
       new_root.save
@@ -87,6 +89,8 @@ class MerkleTree
       #make new root
       current_root.node_type = MerkleTreeNode::PARENT
       new_root = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::ROOT )
+      self.root_node_id = new_root.id
+      self.save
       new_root.save
       current_root.parent = new_root
       current_root.save
@@ -178,6 +182,7 @@ class MerkleTreeNode
 
   belongs_to :parent, optional: true, :class_name => 'MerkleTreeNode', :foreign_key => 'parent_id', :index => true
   #has_many :children, :class_name => 'MerkleTreeNode', :primary_key => 'id', :foreign_key => 'parent_id'
+  belongs_to :ledger_entry_block, optional: true, :index => true
 
 
   field :node_type

@@ -1,10 +1,27 @@
 require "test_helper"
 require_relative '../../lib/tasks/merkle'
+require_relative '../../lib/tasks/digital_wallet'
+require_relative '../../lib/tasks/mint'
 
 class MatchTest < ActiveSupport::TestCase
 
   test "the truth" do
      assert true
+  end
+
+  test "test ledger with merkle trees" do
+    wallet = DigitalWallet.new(:wallet_name => 'test wallet')
+    mint = MatchMintingBank.new
+    coin = mint.mint(:face_value => 1, :digital_wallet => wallet)
+    assert wallet.save
+    assert wallet.debit_coin(coin)
+    coin = mint.mint(:face_value => 1, :digital_wallet => wallet)
+    assert wallet.debit_coin(coin)
+    coin = mint.mint(:face_value => 1, :digital_wallet => wallet)
+    assert wallet.debit_coin(coin)
+    root_node = MerkleTreeNode.where(:id => wallet.ledger.merkle_tree.root_node_id).first
+    assert root_node.node_type == 'ROOT'
+    assert root_node.children
   end
 
   test "test merkle tree" do

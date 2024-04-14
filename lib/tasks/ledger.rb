@@ -1,6 +1,7 @@
 require 'digest'
 require 'mongoid'
 require 'logger'
+require_relative 'merkle'
 
 class Ledger
   include Mongoid::Document
@@ -8,6 +9,7 @@ class Ledger
 
   belongs_to :digital_wallet, :index => true
   has_many :ledger_entry_blocks #object type is LedgerEntryBlock (has_many)
+  has_one :merkle_tree
 
   field :ledger_name
   field :current_ledger_amount #should be all the debit - all the credits
@@ -17,6 +19,7 @@ class Ledger
   #field :new_balance
   after_find :init_logger
   before_create :init_logger
+  before_create :create_merkle_tree
 
   def initialize(params = {:ledger_name => "Default Ledger Name", :current_ledger_amount => 0})
     super(params)
@@ -24,6 +27,12 @@ class Ledger
 
   def init_logger
     @logger = Logger.new(Logger::DEBUG)
+  end
+
+  def create_merkle_tree
+    mt = MerkleTree.new
+    mt.ledger = self
+    mt.save
   end
 
   def new_entry(new_ledger_block)
@@ -70,6 +79,7 @@ class LedgerEntryBlock
   include Mongoid::Timestamps
 
   belongs_to :ledger, :index => true
+  has_one :merkle_tree_node
 
 
 #  BALANCE = "balance"
@@ -88,7 +98,7 @@ class LedgerEntryBlock
   after_find :init_logger
   before_create :init_logger
   before_create :update_balance, :calculate_hash
-
+  before_create :add_merkle_leaf
   CREDIT = "credit"
   DEBIT = "debit"
 
@@ -111,7 +121,7 @@ class LedgerEntryBlock
 
   def update_balance
     previous_block = self.ledger.ledger_entry_blocks.order(:created_at => :desc).first
-    self.balance = previous_block.balance
+    self.balance = previous_block.balance unless self.balance.nil?
     if self.balance == nil 
       self.balance = 0
     end
@@ -129,9 +139,17 @@ class LedgerEntryBlock
     self.current_hash = Digest::SHA256.hexdigest("#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.balance}#{self.ledger_entry_type}#{previous_hash}")
   end
 
+  def add_merkle_leaf
+    mt = self.ledger.merkle_tree
+    merkle_leaf = mt.add_leaf(:stored_data => "#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.balance}#{self.ledger_entry_type}#{previous_hash}", :ledger_entry_block => self)
+    self.merkle_tree_node = merkle_leaf
+  end
+
   def init_logger
     @logger = Logger.new(Logger::DEBUG)
   end
+
+
 end
 
 
