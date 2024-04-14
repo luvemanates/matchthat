@@ -44,6 +44,7 @@ class MerkleTree
     #new_leaf.parent = nil
     available_parent = available_parent(new_leaf)
     new_leaf.save
+    update_digests_for_recent_leaf(new_leaf)
     #puts "new leaf added " + new_leaf.inspect
     #puts "available parent " + available_parent.inspect
   end
@@ -156,6 +157,14 @@ class MerkleTree
         avail_parent_sub_rec(parent_children.last, current_height, new_node)
       end
     end
+  end
+
+  #this is a log n operation
+  def update_digests_for_recent_leaf(node)
+    return if node.parent.nil?
+    parent = node.parent
+    parent.save
+    update_digests_for_recent_leaf(parent)
   end
 
 end
