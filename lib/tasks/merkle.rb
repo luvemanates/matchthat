@@ -44,13 +44,15 @@ class MerkleTree
     #new_leaf.parent = nil
     available_parent = available_parent(new_leaf)
     new_leaf.save
+    #puts "new leaf added " + new_leaf.inspect
+    #puts "available parent " + available_parent.inspect
   end
 
   def available_parent(new_node)
     recently_added_leaf = MerkleTreeNode.where(:merkle_tree => self, :node_type => MerkleTreeNode::LEAF).order(:created_at => :desc).limit(1).first
     if recently_added_leaf.nil? #if there are no leaves, we still need a root to add the leaf
       #make root
-      new_root = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::ROOT )
+      new_root = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::ROOT )
       new_root.save
       new_node.parent = new_root
       new_node.save
@@ -78,18 +80,18 @@ class MerkleTree
   end
 
   def avail_parent_sub(new_node)
-    current_root = MerkleTreeNode.where(:merkle_tree => self, :node_type => MerkleTreeNode::ROOT).first
+    current_root = MerkleTreeNode.where(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::ROOT).first
     current_root.save if current_root.children.size == 2
     if current_root.fulfilled #thinking we should recursively use this code to iterate until an unfulfilled parent
       #make new root
       current_root.node_type = MerkleTreeNode::PARENT
-      new_root = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::ROOT )
+      new_root = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::ROOT )
       new_root.save
       current_root.parent = new_root
       current_root.save
       new_root.save #saving twice to compute merkle root with children available
 
-      new_parent = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::PARENT )
+      new_parent = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::PARENT )
       new_parent.parent = new_root
       new_parent.save
 
@@ -97,7 +99,7 @@ class MerkleTree
       leaf_height = get_leaf_height
       i = 2
       while i < leaf_height
-        new_parent = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::PARENT )
+        new_parent = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::PARENT )
         new_parent.save
         previous_parent.parent = new_parent
         previous_parent.save
@@ -124,7 +126,7 @@ class MerkleTree
 
     parent_children = current_parent.children
     if parent_children.size == 1
-      new_parent = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::PARENT )
+      new_parent = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::PARENT )
       new_parent.parent = current_parent
       new_parent.save
       if current_height == leaf_height
@@ -136,7 +138,7 @@ class MerkleTree
       avail_parent_sub_rec(new_parent, current_height +1, newnode)
     elsif parent_children.size == 0
       if current_height < leaf_height
-        new_parent = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::PARENT )
+        new_parent = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::PARENT )
         new_parent.parent = current_parent
         new_parent.save
         current_parent.save #save to computer merkle for new child
