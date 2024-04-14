@@ -30,21 +30,21 @@ class DigitalWallet
   # it would be fine to have this
   after_find :init_logger
   before_create :init_logger
+  before_create :pre_init
 
   attr_accessor :logger
 
 
-  def initialize(params={})
-    if params[:wallet_name].nil?
-      params[:wallet_name] = 'Default Wallet'
+  def pre_init
+    if self.wallet_name.nil?
+      self.wallet_name = 'Default Wallet'
     end
-    if params[:balance].nil?
-      params[:balance] = 0
+    if self.balance.nil?
+      self.balance = 0
     end
-    if params[:wallet_identification].nil?
-      params[:wallet_identification] = SecureRandom.uuid
+    if self.wallet_identification.nil?
+      self.wallet_identification = SecureRandom.uuid
     end
-    super(params)
   end
 
   def init_logger
@@ -67,7 +67,7 @@ class DigitalWallet
 
   #need to ensure we are not trying to debit the same coin twice
   def debit_coin(coin)
-    ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::DEBIT, :coin => coin)
+    ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::DEBIT, :coin_serial_number => coin.serial_number, :coin_face_value => coin.face_value)
     self.ledger.ledger_entry_blocks << ledger_entry_block
     self.coins << coin;
 
@@ -84,7 +84,7 @@ class DigitalWallet
     #self.coins.delete(coin)
     @logger.debug("coin credit is ")
     @logger.debug(coin.inspect)
-    ledger_entry_block = LedgerEntryBlock.new({:ledger_entry_type => LedgerEntryBlock::CREDIT, :coin => coin})
+    ledger_entry_block = LedgerEntryBlock.new({:ledger_entry_type => LedgerEntryBlock::CREDIT, :coin_serial_number => coin.serial_number, :coin_face_value => coin.face_value})
     self.ledger.ledger_entry_blocks << ledger_entry_block
     @logger.debug "balance equation is (" + self.balance.to_s + " - " + coin.face_value.to_s + ")"
     self.balance = self.balance.to_i - coin.face_value.to_i

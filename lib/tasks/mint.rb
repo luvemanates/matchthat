@@ -36,7 +36,7 @@ class MatchMintingBank
     @ledger = Ledger.new(:ledger_name => 'MatchMint Ledger') if @ledger.nil?
     @exchange.coins << coin 
     @total_coins = @total_coins.to_i + params[:face_value].to_i
-    ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::DEBIT, :coin => coin)
+    ledger_entry_block = LedgerEntryBlock.new(:ledger_entry_type => LedgerEntryBlock::DEBIT, :coin_serial_number => coin.serial_number, :coin_face_value => coin.face_value)
     ledger_entry_block.ledger = @ledger
     @ledger.new_entry(ledger_entry_block)
     return coin
@@ -63,28 +63,24 @@ class MatchMintCoin #or match coin
   #attr_accessor :face_value
   attr_accessor :logger
   #attr_accessor :crypto_card 
+  before_create :pre_init
   after_create :do_crypto_card
   after_find :init_logger
   before_create :init_logger
 
-  def initialize(params)
+  def pre_init
     @logger = Logger.new(Logger::DEBUG)
     @logger.debug "match mint init params is "
-    @logger.debug params.inspect
-    if params[:face_value].nil?
+    if self.face_value.nil?
       #puts 'setting face_value to 1'
-      params[:face_value] = 1
+      self.face_value = 1
     end
-    if params[:serial_number].nil?
-      params[:serial_number] = SecureRandom.uuid
+    if self.serial_number.nil?
+      self.serial_number = SecureRandom.uuid
     end
-    if params[:digital_wallet].nil?
+    if self.digital_wallet.nil?
       throw "No wallet found"
     end
-    #crypto_card = MatchThatCryptography.new(:card_name => "coin card")
-    #@crypto_card = crypto_card.save 
-    #params[:crypto_card] = @crypto_card
-    super(params)
   end
 
   def init_logger

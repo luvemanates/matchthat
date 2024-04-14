@@ -18,11 +18,13 @@ class Ledger
   #It would probably be better accounting to have a balance update in the entry
   #field :new_balance
   after_find :init_logger
+  before_create :pre_init
   before_create :init_logger
   before_create :create_merkle_tree
 
-  def initialize(params = {:ledger_name => "Default Ledger Name", :current_ledger_amount => 0})
-    super(params)
+  def pre_init
+    self.ledger_name = "Default Ledger Name" if self.ledger_name.nil?
+    self.current_ledger_amount = 0 if self.ledger_name.nil?
   end
 
   def init_logger
@@ -33,6 +35,7 @@ class Ledger
     mt = MerkleTree.new
     mt.ledger = self
     mt.save
+    self.merkle_tree = mt
   end
 
   def new_entry(new_ledger_block)
@@ -96,27 +99,17 @@ class LedgerEntryBlock
   #It would probably be better accounting to have a balance update in the entry
   #field :new_balance
   after_find :init_logger
+  before_create :pre_init
   before_create :init_logger
   before_create :update_balance, :calculate_hash
   before_create :add_merkle_leaf
   CREDIT = "credit"
   DEBIT = "debit"
 
-  def initialize(params)
+  def pre_init
     @logger = Logger.new(Logger::DEBUG)
-    @ledger_entry_type = params[:ledger_entry_type]
     
     @logger.debug( "inspecting params passed to ledger")
-    @logger.debug( params.inspect )
-    @entry_amount = params[:coin].face_value 
-    @coin_serial_number = params[:coin].serial_number
-    @coin_face_value = params[:coin].face_value
-
-    params[:entry_amount] = params[:coin].face_value 
-    params[:coin_serial_number] = params[:coin].serial_number
-    params[:coin_face_value] = params[:coin].face_value
-    params.delete(:coin)
-    super(params)
   end
 
   def update_balance
@@ -140,9 +133,13 @@ class LedgerEntryBlock
   end
 
   def add_merkle_leaf
-    mt = self.ledger.merkle_tree
-    merkle_leaf = mt.add_leaf(:stored_data => "#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.balance}#{self.ledger_entry_type}#{previous_hash}", :ledger_entry_block => self)
-    self.merkle_tree_node = merkle_leaf
+    if ledger.merkle_tree
+      previous_block = self.ledger.ledger_entry_blocks.order(:created_at => :desc).first
+      previous_hash = previous_block.current_hash if not previous_block.nil?
+      mt = self.ledger.merkle_tree 
+      merkle_leaf = mt.add_leaf(:stored_data => "#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.balance}#{self.ledger_entry_type}#{previous_hash}", :ledger_entry_block => self)
+      self.merkle_tree_node = merkle_leaf
+    end
   end
 
   def init_logger
