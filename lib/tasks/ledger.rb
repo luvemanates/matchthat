@@ -24,7 +24,7 @@ class Ledger
 
   def pre_init
     self.ledger_name = "Default Ledger Name" if self.ledger_name.nil?
-    self.current_ledger_amount = 0 if self.ledger_name.nil?
+    self.current_ledger_amount = 0 if self.current_ledger_amount.nil?
   end
 
   def init_logger
@@ -137,8 +137,7 @@ class LedgerEntryBlock
       previous_block = self.ledger.ledger_entry_blocks.order(:created_at => :desc).first
       previous_hash = previous_block.current_hash if not previous_block.nil?
       mt = self.ledger.merkle_tree 
-      merkle_leaf = mt.add_leaf(:stored_data => "#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.balance}#{self.ledger_entry_type}#{previous_hash}", :ledger_entry_block => self)
-      self.merkle_tree_node = merkle_leaf
+      merkle_leaf = mt.add_leaf(:ledger_entry_block_id => self.id, :stored_data => "#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.balance}#{self.ledger_entry_type}#{previous_hash}")
     end
   end
 

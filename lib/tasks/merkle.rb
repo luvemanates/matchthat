@@ -36,7 +36,7 @@ class MerkleTree
 
   def add_leaf(params)
     #recently_added_leaves = MerkleTreeNode.where(:node_type => 'leaf').order(:created_at => :desc).limit(2) 
-    new_leaf = MerkleTreeNode.new(:merkle_tree => self, :node_type => MerkleTreeNode::LEAF, :stored_data => params[:data])
+    new_leaf = MerkleTreeNode.new(:ledger_entry_block_id => params[:ledger_entry_block_id], :merkle_tree => self, :node_type => MerkleTreeNode::LEAF, :stored_data => params[:data])
     new_leaf.stored_data = params[:stored_data] #there is a bug somehwere because i shouldnt need to do this
     #new_leaf.merkle_hash = Digest::SHA256.digest(new_leaf[:stored_data])
     #new_leaf.fulfilled = true
@@ -45,6 +45,7 @@ class MerkleTree
     available_parent = available_parent(new_leaf)
     new_leaf.save
     update_digests_for_recent_leaf(new_leaf)
+    return new_leaf
     #puts "new leaf added " + new_leaf.inspect
     #puts "available parent " + available_parent.inspect
   end
@@ -140,14 +141,14 @@ class MerkleTree
         new_parent.save #save to cacl merkle for new child
         return new_parent
       end
-      avail_parent_sub_rec(new_parent, current_height +1, newnode)
+      avail_parent_sub_rec(new_parent, current_height +1, new_node)
     elsif parent_children.size == 0
       if current_height < leaf_height
         new_parent = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::PARENT )
         new_parent.parent = current_parent
         new_parent.save
         current_parent.save #save to computer merkle for new child
-        avail_parent_sub_rec(new_parent, current_height +1, newnode)
+        avail_parent_sub_rec(new_parent, current_height +1, new_node)
       else
         new_node.parent = current_parent
         new_node.save
@@ -205,8 +206,8 @@ class MerkleTreeNode
       when MerkleTreeNode::PARENT, MerkleTreeNode::ROOT
         children = self.children
         if children.size == 2
-          dec_fc = Base64.decode64(children.last.merkle_hash) 
-          dec_sc = Base64.decode64(children.first.merkle_hash)
+          dec_fc = Base64.decode64(children.last.merkle_hash.to_s) 
+          dec_sc = Base64.decode64(children.first.merkle_hash.to_s)
           self.merkle_hash = Base64.encode64(Digest::SHA256.digest(dec_fc + " " + dec_sc))
           self[:fulfilled] = true
           @fulfilled = true
