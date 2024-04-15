@@ -7,13 +7,13 @@ xml.rss :version => "2.0" do
       merkle_hash = block.merkle_tree_node.merkle_hash
       #merkle_root = MerkleTreeNode.where(:id => block.merkle_tree_node.merkle_tree.root_node_id).first
       merkle_root = MerkleTreeNode.where(:id => @ledger.merkle_tree.root_node_id).first
-      merkle_root.reload
+      wallet_balance = @wallet.reload.balance
       xml.item do
         xml.id block.id
         xml.current_hash block.current_hash
-        xml.merkle_root merkle_root.merkle_hash
-        xml.merkle_hash merkle_hash
+        xml.merkle_root merkle_root.reload.merkle_hash
         xml.type block.ledger_entry_type
+        xml.wallet_balance wallet_balance
         xml.coin_serial_number block.coin_serial_number
         xml.coin_face_value block.coin_face_value
         xml.entry_amount block.entry_amount

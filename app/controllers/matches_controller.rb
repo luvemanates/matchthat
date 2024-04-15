@@ -7,8 +7,9 @@ class MatchesController < ApplicationController
   before_action :set_match, only: %i[ show edit update destroy user_tally ]
 
   def feed
+    @wallet = DigitalWallet.where(:wallet_name => 'Bank Wallet').first
     @ledger = Ledger.where(:ledger_name => 'Bank Wallet Ledger').first
-    @ledger_entry_blocks = @ledger.ledger_entry_blocks.order(:created_at => :desc).limit(10)
+    @ledger_entry_blocks = @ledger.ledger_entry_blocks.order(:created_at => :desc).limit(20)
     respond_to do |format|
       format.rss  { render :layout => false }
       format.xml { render 'feed', :layout => false}
