@@ -118,17 +118,19 @@ class MerkleTree
           new_parent.save #resave to calc child hash
       end
     else #current_root.fulfilled == false
-      avail_parent_sub_rec(current_root, 1, new_node) #, new_node?
+      avail_parent_sub_rec(current_root, 1, new_node, 0) #, new_node?
     end
     return new_node.parent
   end
 
   #this may need to be changed to start at the root and create parents otherwise we have traverse the tree and add merkle hash's after the leaf is added
   #maybe traverse the tree following unfulfilled nodes, 
-  def avail_parent_sub_rec(subtree = nil, current_height = 1, new_node = nil)
+  def avail_parent_sub_rec(subtree = nil, current_height = 1, new_node = nil, leaf_height =0)
     return if subtree == nil
     current_parent = subtree
-    leaf_height = get_leaf_height
+    if leaf_height == 0 or leaf_height.nil?
+      leaf_height = get_leaf_height
+    end
 
     parent_children = current_parent.children
     if parent_children.size == 1
@@ -141,14 +143,14 @@ class MerkleTree
         new_parent.save #save to cacl merkle for new child
         return new_parent
       end
-      avail_parent_sub_rec(new_parent, current_height +1, new_node)
+      avail_parent_sub_rec(new_parent, current_height +1, new_node, leaf_height)
     elsif parent_children.size == 0
       if current_height < leaf_height
         new_parent = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::PARENT )
         new_parent.parent = current_parent
         new_parent.save
         current_parent.save #save to computer merkle for new child
-        avail_parent_sub_rec(new_parent, current_height +1, new_node)
+        avail_parent_sub_rec(new_parent, current_height +1, new_node, leaf_height)
       else
         new_node.parent = current_parent
         new_node.save
@@ -156,10 +158,10 @@ class MerkleTree
       end
     else #size == 2
       if not parent_children.first.fulfilled
-        avail_parent_sub_rec(parent_children.first, current_height, new_node)
+        avail_parent_sub_rec(parent_children.first, current_height, new_node, leaf_height)
       end
       if not parent_children.last.fulfilled
-        avail_parent_sub_rec(parent_children.last, current_height, new_node)
+        avail_parent_sub_rec(parent_children.last, current_height, new_node, leaf_height)
       end
     end
   end
