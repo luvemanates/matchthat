@@ -32,13 +32,16 @@ class MatchTest < ActiveSupport::TestCase
     mt.add_leaf({:stored_data => 'leaf 2'})
     assert MerkleTreeNode.where(:node_type => 'LEAF').first.stored_data == "leaf 1"
     assert MerkleTreeNode.where(:node_type => 'LEAF').first.parent.node_type == "ROOT"
+    assert_equal 2, mt.get_leaf_height
 
     mt.add_leaf({:stored_data => 'leaf 3'})
     mt.add_leaf({:stored_data => 'leaf 4'})
+    assert_equal 3, mt.get_leaf_height
     assert MerkleTreeNode.where(:stored_data => 'leaf 3').first.parent.node_type == "PARENT"
 
     mt.add_leaf({:stored_data => 'leaf 5'})
     mt.add_leaf({:stored_data => 'leaf 6'})
+    assert_equal 4, mt.get_leaf_height
     assert MerkleTreeNode.where(:stored_data => 'leaf 3').first.parent.node_type == "PARENT"
 
     mt.add_leaf({:stored_data => 'leaf 7'})
@@ -46,6 +49,11 @@ class MatchTest < ActiveSupport::TestCase
     assert MerkleTreeNode.where(:stored_data => 'leaf 5').first.parent.node_type == "PARENT"
     assert MerkleTreeNode.where(:stored_data => 'leaf 5').first.parent.parent.node_type == "PARENT"
     assert MerkleTreeNode.where(:stored_data => 'leaf 5').first.parent.parent.parent.node_type == "ROOT"
+    assert_equal 4,  mt.get_leaf_height
+
+    mt.add_leaf({:stored_data => 'leaf 9'})
+    mt.add_leaf({:stored_data => 'leaf 10'})
+    assert_equal 5,  mt.get_leaf_height
   end
 
   test "can create a match with a user" do

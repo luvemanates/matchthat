@@ -24,9 +24,9 @@ class MerkleTree
   end
 
   def get_leaf_height
-    leaf = MerkleTreeNode.where(:node_type => MerkleTreeNode::LEAF).first
-    parent = leaf.parent
+    leaf = MerkleTreeNode.where(:merkle_tree_id => self.id, :node_type => MerkleTreeNode::LEAF).first
     leaf_height = 1
+    parent = leaf.parent
     while not parent.nil?
       leaf_height = leaf_height + 1
       parent = parent.parent
