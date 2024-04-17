@@ -114,7 +114,9 @@ class LedgerEntryBlock
 
   def update_balance
     previous_block = self.ledger.ledger_entry_blocks.order(:created_at => :desc).first
-    self.balance = previous_block.balance unless previous_block.balance.nil?
+    if not previous_block.nil?
+      self.balance = previous_block.balance unless previous_block.balance.nil?
+    end
     if self.balance == nil 
       self.balance = 0
     end
