@@ -139,6 +139,7 @@ class LedgerEntryBlock
       previous_block = self.ledger.ledger_entry_blocks.order(:created_at => :desc).first
       previous_hash = previous_block.current_hash if not previous_block.nil?
       mt = self.ledger.merkle_tree 
+      @logger.debug( "Adding merkle tree leaf")
       merkle_leaf = mt.add_leaf(:ledger_entry_block_id => self.id, :stored_data => "#{self.id}#{self.created_at}#{self.coin_serial_number}#{self.balance}#{self.ledger_entry_type}#{previous_hash}")
     end
   end
