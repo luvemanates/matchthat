@@ -28,27 +28,18 @@ class MatchThatCryptography
 
   after_find :init_logger
   before_create :init_logger
+  before_create :pre_init
 
-  def initialize(params={:card_name => 'default card'})
+  def pre_init
+    self.card_name = 'default card' if self.card_name.nil?
     keypair = OpenSSL::PKey::RSA.new(CONFIG[:key_length])
-    @private_key = Base64.encode64(keypair.private_to_pem)
-    @public_key  = Base64.encode64(keypair.public_to_pem) #OpenSSL::PKey::RSA.new(@keypair.public_key.to_der)
-    @card_name = params[:card_name] 
-    params[:private_key] = @private_key
-    params[:public_key] = @public_key
-    params[:card_name] = @card_name
-    super(params)
+    self.private_key = Base64.encode64(keypair.private_to_pem)
+    self.public_key  = Base64.encode64(keypair.public_to_pem) #OpenSSL::PKey::RSA.new(@keypair.public_key.to_der)
   end
 
   def init_logger
     @logger = Logger.new(Logger::DEBUG)
     @logger.debug("initialized logger in digital wallet")
-  end
-
-  #need to decode and objectify database data - it would be nice to use the marshalling method
-  def ssobject_load
-    @ss_private_key = OpenSSL::PKey::RSA.new( Base64.decode64( @private_key) )
-    @ss_public_key = OpenSSL::PKey::RSA.new( Base64.decode64( @public_key) )
   end
 
 =begin
@@ -70,23 +61,19 @@ class MatchThatCryptography
   end
 
   def encrypt_message_with_public_key(message)
-    if @public_key.is_a?(String)
-      @public_key = OpenSSL::PKey::RSA.new( Base64.decode64( @public_key) )
-    elsif self.public_key.is_a?(String)
-      @public_key = OpenSSL::PKey::RSA.new( Base64.decode64( self.public_key) )
+    if self.public_key.is_a?(String)
+      self.public_key = OpenSSL::PKey::RSA.new( Base64.decode64( self.public_key) )
     end
-    encrypted_message = @public_key.public_encrypt(message)
+    encrypted_message = self.public_key.public_encrypt(message)
     return encrypted_message
     #encrypted_secret = to_party[:pubkey].public_encrypt(secret)
   end
 
   def decrypt_message_with_private_key(encrypted_message)
-    if @private_key.is_a?(String)
-      @private_key = OpenSSL::PKey::RSA.new( Base64.decode64( @private_key) )
-    elsif self.private_key.is_a?(String)
-      @private_key = OpenSSL::PKey::RSA.new( Base64.decode64( self.private_key) )
+    if self.private_key.is_a?(String)
+      self.private_key = OpenSSL::PKey::RSA.new( Base64.decode64( self.private_key) )
     end
-    decrypted_message = @private_key.private_decrypt(encrypted_message)
+    decrypted_message = self.private_key.private_decrypt(encrypted_message)
     return decrypted_message
   end
 
@@ -126,6 +113,21 @@ class MatchThatCryptography
     return decrypted_secret
 
   end
+  def sign(message)
+    if self.private_key.is_a?(String)
+      self.private_key = OpenSSL::PKey::RSA.new( Base64.decode64( self.private_key) )
+    end
+    signature = self.private_key.sign(CONFIG[:digest_func], message)
+    return signature
+  end
+
+  def verify(signature, decrypted_data)
+    if self.public_key.is_a?(String)
+      self.public_key = OpenSSL::PKey::RSA.new( Base64.decode64( self.public_key) )
+    end
+    result = self.public_key.verify(CONFIG[:digest_func], signature, decrypted_data)
+    return result
+  end
 end
 
 class MatchThatCipher
@@ -163,3 +165,5 @@ class MatchThatCipher
     return plain
   end
 end
+
+

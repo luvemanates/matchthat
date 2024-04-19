@@ -44,11 +44,11 @@ class MintServer
     existing_crypto = MatchThatCryptography.where(:card_name => 'mint wallet crypto card').first
     unless existing_crypto
       @crypto = MatchThatCryptography.new(:card_name => 'mint wallet crypto card')
-      #@crypto.crypto_card_carrier = @mint
+      @crypto.crypto_card_carrier = @mint_wallet
       @crypto.save
     else
       @crypto = existing_crypto
-      @crypto.ssobject_load
+      #@crypto.ssobject_load
     end
 
 

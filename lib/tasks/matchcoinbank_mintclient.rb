@@ -32,15 +32,6 @@ class MintClientBank
 
     @logger = Logger.new(Logger::DEBUG)
 
-    existing_bank_crypto = MatchThatCryptography.where(:Card_name => "Mint Bank Wallet Crypto Card").first
-    unless existing_bank_crypto
-      @bank_crypto = MatchThatCryptography.new(:card_name => "Mint Bank Wallet Crypto Card")
-      @bank_crypto.crypto_card_carrier = @bank_wallet
-      @bank_crypto.save
-    else
-      @bank_crypto = existing_bank_crypto
-      @bank_crypto.ssobject_load
-    end
 
     bank_wallet = DigitalWallet.where(:wallet_name => 'Bank Wallet').first
     unless bank_wallet
@@ -48,6 +39,16 @@ class MintClientBank
       @bank_wallet.save
     else
       @bank_wallet = bank_wallet
+    end
+
+    existing_bank_crypto = MatchThatCryptography.where(:card_name => "Mint Bank Wallet Crypto Card").first
+    unless existing_bank_crypto
+      @bank_crypto = MatchThatCryptography.new(:card_name => "Mint Bank Wallet Crypto Card")
+      @bank_crypto.crypto_card_carrier = @bank_wallet
+      @bank_crypto.save
+    else
+      @bank_crypto = existing_bank_crypto
+      #@bank_crypto.ssobject_load
     end
 
     @exchange = CentralizedExchange.new
@@ -94,6 +95,10 @@ class MintClientBank
     port = 2000
     @bank_client = TCPSocket.open(host, port)
     request = { 'public_key' => @bank_crypto.public_key }.to_json
+    @logger.debug "requesting "
+    @logger.debug request.inspect
+    @logger.debug "bank crypto object"
+    @logger.debug @bank_crypto.inspect
     @bank_client.puts(request)
     response = @bank_client.gets
     params = JSON.parse(response) unless response.nil?
