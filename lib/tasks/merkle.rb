@@ -36,7 +36,7 @@ class MerkleTree
 
   def add_leaf(params)
     #recently_added_leaves = MerkleTreeNode.where(:node_type => 'leaf').order(:created_at => :desc).limit(2) 
-    new_leaf = MerkleTreeNode.new(:ledger_entry_block_id => params[:ledger_entry_block_id], :merkle_tree => self, :node_type => MerkleTreeNode::LEAF, :stored_data => params[:data])
+    new_leaf = MerkleTreeNode.new(:ledger_entry_block_id => params[:ledger_entry_block_id], :merkle_tree => self, :node_type => MerkleTreeNode::LEAF, :stored_data => params[:stored_data])
     new_leaf.stored_data = params[:stored_data] #there is a bug somehwere because i shouldnt need to do this
     #new_leaf.merkle_hash = Digest::SHA256.digest(new_leaf[:stored_data])
     #new_leaf.fulfilled = true
