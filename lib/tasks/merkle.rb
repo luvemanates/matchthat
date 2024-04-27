@@ -43,8 +43,12 @@ class MerkleTree
     #puts subtree.inspect
     nsubtree_left  = subtree.children.first
     nsubtree_right = subtree.children.last
-    traverse_tree( nsubtree_left, new_leaf, leaf_height, current_height + 1, leaf_inserted )
-    traverse_tree( nsubtree_right, new_leaf, leaf_height, current_height + 1, leaf_inserted )
+    unless nsubtree_left.fulfilled
+      traverse_tree( nsubtree_left, new_leaf, leaf_height, current_height + 1, leaf_inserted )
+    end
+    unless nsubtree_right.fulfilled
+      traverse_tree( nsubtree_right, new_leaf, leaf_height, current_height + 1, leaf_inserted )
+    end
   end
   
   def insert_for_root(subtree, new_leaf, leaf_height, current_height, leaf_inserted )
@@ -95,6 +99,7 @@ class MerkleTree
         return leaf_inserted
       end
       if subtree.children.first.node_type == "PARENT"
+        return if leaf_height == (current_height + 1)
         new_parent = MerkleTreeNode.new(:merkle_tree_id => self.id, :node_type => "PARENT", :parent_id => subtree.id)
         new_parent.save
       end
@@ -140,6 +145,7 @@ class MerkleTree
     insert_done = false
     #recently_added_leaves = MerkleTreeNode.where(:node_type => 'leaf').order(:created_at => :desc).limit(2) 
     new_leaf = MerkleTreeNode.new(:merkle_tree_id => self.id, :ledger_entry_block => params[:ledger_entry_block], :node_type => MerkleTreeNode::LEAF, :stored_data => params[:stored_data])
+
 
     #case 1 - no nodes
     if self.merkle_tree_nodes.empty?
