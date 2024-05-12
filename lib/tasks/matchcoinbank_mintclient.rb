@@ -92,13 +92,14 @@ class MintClientBank
 
   def secure_connection
     host = 'localhost'
-    port = 2000
+    port = 2001
     @bank_client = TCPSocket.open(host, port)
     request = { 'public_key' => @bank_crypto.public_key }.to_json
     @logger.debug "requesting "
     @logger.debug request.inspect
     @logger.debug "bank crypto object"
     @logger.debug @bank_crypto.inspect
+    @logger.debug("Posting to client")
     @bank_client.puts(request)
     response = @bank_client.gets
     params = JSON.parse(response) unless response.nil?

@@ -83,7 +83,7 @@ class MintServer
 
   def secure_connection
     host = 'localhost'
-    port = 2000
+    port = 2001
     @server = TCPServer.open(host, port) # Bind to port 2000
     #matchthatbank_crypto = MatchThatCryptography.new(MatchThatCryptography::CONFIG)
 
@@ -93,8 +93,9 @@ class MintServer
     random_secret = @cipher.cipher_key #(0...16).map { (65 + rand(26)).chr }.join
     @logger.debug("random secret is " + random_secret.to_s)
 
+    @logger.debug("Waiting for post from client")
     @client = @server.accept
-    params = JSON.parse(client.gets)
+    params = JSON.parse(@client.gets)
     if not params["public_key"].nil?
       @logger.debug("the public key from the client is ")
       @logger.debug( params["public_key"] )
