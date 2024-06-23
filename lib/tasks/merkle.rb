@@ -150,8 +150,8 @@ class MerkleTree
     leaf_height = 1
     parent = leaf.parent
     while not parent.nil?
-      leaf_height = leaf_height + 1
       parent = parent.parent
+      leaf_height = leaf_height + 1
     end
     return leaf_height
   end
@@ -199,6 +199,7 @@ class MerkleTree
         #@logger.debug "new_root reload" + new_root.reload.inspect
         current_root.node_type = "PARENT"
         current_root.parent = new_root
+        current_root.save
         self.root_node_id = new_root.id
         new_root.save #pull in the hash
         current_root = new_root
